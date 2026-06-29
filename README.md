@@ -10,16 +10,16 @@ Axim is a USDT‑first wallet on Kaia. `@axim/connect` is **not a new protocol**
 
 | Package | Description |
 |---|---|
-| [`@axim/connect`](./packages/connect) | Vendor‑agnostic core: branded connector, EIP‑1193 provider, RainbowKit custom wallet, `appId` attribution. |
-| [`@axim/connect-alphasec`](./packages/connect-alphasec) | AlphaSec venue adapter: `authorizeSession`, `deposit`, `withdraw`, `getVenueBalance`. |
+| [`@axim/connect`](./packages/connect) | **Published.** Vendor‑agnostic core: branded connector, EIP‑1193 provider, RainbowKit custom wallet, `appId` attribution. |
+| [`@axim/connect-alphasec`](./packages/connect-alphasec) | **In‑repo, not published.** AlphaSec venue adapter (`authorizeSession`, `deposit`, `withdraw`, `getVenueBalance`). Consumed from this monorepo by the venue. |
 
 ## Install
 
 ```bash
 npm install @axim/connect
-# venue adapter (optional)
-npm install @axim/connect-alphasec
 ```
+
+> Only `@axim/connect` is published to npm. Venue adapters (e.g. the AlphaSec adapter) live in this monorepo and are consumed by the venue directly — the public package stays venue‑agnostic.
 
 Peer dependencies (provide the ones your app uses): `viem`, `wagmi`, `@rainbow-me/rainbowkit`, `@walletconnect/universal-provider`.
 
