@@ -1,3 +1,5 @@
+import type { ChainConfig } from "./chains.js";
+
 /** Minimal EIP-1193 provider surface used across the SDK. */
 export interface Eip1193Provider {
   request<T = unknown>(args: { method: string; params?: unknown[] | object }): Promise<T>;
@@ -5,27 +7,52 @@ export interface Eip1193Provider {
   removeListener(event: string, handler: (payload: unknown) => void): void;
 }
 
+export type Address = `0x${string}`;
+
 export interface AximConnectorOptions {
   /** WalletConnect Cloud project id. */
   projectId: string;
   /** Attribution id carried in the WC session metadata (e.g. "alphasec"). */
   appId: string;
-  /** Allowed EVM chain ids. Defaults to [8217] (Kaia mainnet). */
-  chains?: number[];
+  /** Allowed chains. Defaults to [kaia]. The provider is scoped to these. */
+  chains?: ChainConfig[];
   /** Optional override of the relay url. */
   relayUrl?: string;
 }
 
+export type ConnectorStatus = "disconnected" | "connecting" | "connected";
+
+export interface ConnectResult {
+  address: Address;
+  chainId: number;
+}
+
+/** Connector event payloads. */
+export interface AximConnectorEvents {
+  connect: ConnectResult;
+  disconnect: void;
+  accountsChanged: Address[];
+  chainChanged: number;
+}
+export type AximConnectorEvent = keyof AximConnectorEvents;
+
 export interface AximConnector {
-  /** Returns a standard EIP-1193 provider (lazily initialized). */
-  getProvider(): Eip1193Provider;
-  /** Tear down the WC session. */
+  /** Establish a WalletConnect v2 session (or resume an existing one). */
+  connect(): Promise<ConnectResult>;
+  /** Resume a persisted session if present; otherwise null. "Connect once, stay connected." */
+  resume(): Promise<ConnectResult | null>;
+  /** Tear down the session. */
   disconnect(): Promise<void>;
+  /** Standard EIP-1193 provider. Throws if not connected. */
+  getProvider(): Eip1193Provider;
+  /** Current connection status. */
+  getStatus(): ConnectorStatus;
+  on<E extends AximConnectorEvent>(event: E, handler: (payload: AximConnectorEvents[E]) => void): void;
+  off<E extends AximConnectorEvent>(event: E, handler: (payload: AximConnectorEvents[E]) => void): void;
 }
 
 /** Token reference: symbol or numeric venue token id (1 = KAIA, 2 = USDT). */
 export type TokenRef = "USDT" | "KAIA" | number;
-export type Address = `0x${string}`;
 
 export interface SessionGrant {
   sessionAddress: Address;
@@ -67,9 +94,7 @@ export interface AximWalletConfig {
   name: string;
   iconUrl: string | (() => Promise<string>);
   iconBackground: string;
-  /** RainbowKit calls this with the WC uri to build the mobile deep link. */
   mobile?: { getUri: (uri: string) => string };
-  /** Desktop QR fallback. */
   qrCode?: { getUri: (uri: string) => string };
   createConnector: unknown;
 }
