@@ -1,0 +1,23 @@
+{
+  "name": "axim-connect-sdk",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Connect dApps to Axim Wallet over WalletConnect v2.",
+  "license": "MIT",
+  "homepage": "https://docs.axim.one",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/axim/axim-connect-sdk.git"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "tsc -b",
+    "clean": "rm -rf packages/*/dist packages/*/*.tsbuildinfo"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}

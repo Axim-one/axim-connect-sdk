@@ -1,0 +1,18 @@
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+# never commit compiled artifacts that land next to TS sources
+packages/*/src/**/*.js
+packages/*/src/**/*.js.map
+packages/*/src/**/*.d.ts
+packages/*/src/**/*.d.ts.map
+coverage/
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log
+npm-debug.log*
+.idea/
+.vscode/

@@ -1,0 +1,26 @@
+{
+  "name": "@axim/connect-alphasec",
+  "version": "0.1.0-alpha.0",
+  "description": "AlphaSec venue adapter for @axim/connect (session, deposit, withdraw, balance).",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist", "README.md"],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "keywords": ["axim", "alphasec", "kaia", "walletconnect", "dex"],
+  "publishConfig": { "access": "public" },
+  "dependencies": {
+    "@axim/connect": "^0.1.0-alpha.0"
+  }
+}

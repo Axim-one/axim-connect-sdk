@@ -1,0 +1,33 @@
+{
+  "name": "@axim/connect",
+  "version": "0.1.0-alpha.0",
+  "description": "Branded WalletConnect v2 connector + EIP-1193 provider for Axim Wallet.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist", "README.md"],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "keywords": ["axim", "walletconnect", "wallet", "eip-1193", "kaia", "web3"],
+  "publishConfig": { "access": "public" },
+  "peerDependencies": {
+    "@rainbow-me/rainbowkit": ">=2",
+    "@walletconnect/universal-provider": ">=2",
+    "viem": ">=2",
+    "wagmi": ">=2"
+  },
+  "peerDependenciesMeta": {
+    "@rainbow-me/rainbowkit": { "optional": true },
+    "wagmi": { "optional": true }
+  }
+}
