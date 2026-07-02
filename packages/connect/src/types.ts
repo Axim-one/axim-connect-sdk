@@ -95,6 +95,23 @@ export interface AximWalletConfig {
   iconUrl: string | (() => Promise<string>);
   iconBackground: string;
   mobile?: { getUri: (uri: string) => string };
-  qrCode?: { getUri: (uri: string) => string };
+  qrCode?: {
+    getUri: (uri: string) => string;
+    instructions?: {
+      learnMoreUrl?: string;
+      steps: { step: string; title: string; description: string }[];
+    };
+  };
+  /** Store / download links surfaced by RainbowKit's wallet UI. */
+  downloadUrls?: {
+    android?: string;
+    ios?: string;
+    chrome?: string;
+    qrCode?: string;
+    mobile?: string;
+    browserExtension?: string;
+  };
+  // Structural: RainbowKit's real `createConnector` type needs wagmi, which we
+  // do not import. Callers inject the concrete factory (see aximWallet).
   createConnector: unknown;
 }
