@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>@axim/connect — AlphaSec 연동 샘플</title>
+<style>
+  :root{
+    --navy:#0F1B3D; --bg:#0a1020; --panel:#111a33; --panel2:#0e1730;
+    --line:#22304f; --text:#e6ebf5; --muted:#8a95b5; --brand:#3b82f6;
+    --usdt:#26a17b; --ok:#22c55e; --warn:#f59e0b; --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:radial-gradient(1200px 600px at 80% -10%, #16224a 0, transparent 60%), var(--bg);
+    color:var(--text); font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+    -webkit-font-smoothing:antialiased; min-height:100vh;
+  }
+  a{color:var(--brand);text-decoration:none}
+  .wrap{max-width:1120px;margin:0 auto;padding:28px 20px 64px}
+  header.top{display:flex;align-items:center;gap:14px;margin-bottom:8px}
+  .logo{width:38px;height:38px;border-radius:10px;background:var(--navy);display:grid;place-items:center;box-shadow:0 0 0 1px var(--line), 0 8px 24px rgba(0,0,0,.35)}
+  .logo svg{width:22px;height:22px}
+  h1{font-size:20px;margin:0;letter-spacing:.2px}
+  h1 .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--brand)}
+  .sub{color:var(--muted);margin:2px 0 22px;font-size:13.5px}
+  .badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);vertical-align:middle;margin-left:8px}
+  .grid{display:grid;grid-template-columns:1.15fr .85fr;gap:20px}
+  @media(max-width:880px){.grid{grid-template-columns:1fr}}
+  .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+  .card h2{font-size:13px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin:0 0 14px;font-weight:600}
+  .venue-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .venue-name{display:flex;align-items:center;gap:9px;font-weight:600}
+  .dot{width:8px;height:8px;border-radius:50%;background:#475569}
+  .dot.on{background:var(--ok);box-shadow:0 0 0 4px rgba(34,197,94,.15)}
+  .acct{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--muted)}
+  .bal{display:flex;align-items:baseline;gap:8px;margin:6px 0 16px}
+  .bal .amt{font-size:30px;font-weight:700;letter-spacing:.5px}
+  .bal .tk{color:var(--usdt);font-weight:700}
+  .bal .locked{color:var(--muted);font-size:12px;margin-left:auto}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--line);background:#16213f;color:var(--text);padding:10px 14px;transition:.15s}
+  button:hover:not(:disabled){border-color:#33477a;background:#1a2748}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  button.primary{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:600}
+  button.primary:hover:not(:disabled){filter:brightness(1.08)}
+  .field{display:flex;gap:8px;align-items:center;margin:10px 0 2px}
+  input[type=text]{flex:1;background:#0c1428;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:10px 12px;font:inherit}
+  .hint{color:var(--muted);font-size:12px;margin-top:6px}
+  /* phone */
+  .phone-wrap{display:flex;justify-content:center}
+  .phone{width:280px;height:560px;border-radius:34px;background:#05080f;border:1px solid #1d2842;box-shadow:0 30px 60px rgba(0,0,0,.5),inset 0 0 0 6px #0a0f1c;padding:14px;position:relative;overflow:hidden}
+  .notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:100px;height:22px;background:#05080f;border-radius:0 0 14px 14px;z-index:5}
+  .screen{height:100%;border-radius:24px;background:linear-gradient(180deg,#0c1326,#0a1020);border:1px solid #16213f;padding:16px 14px;display:flex;flex-direction:column}
+  .wallet-brand{display:flex;align-items:center;gap:8px;margin:14px 0 auto}
+  .wallet-brand .logo{width:26px;height:26px;border-radius:7px}
+  .wallet-brand b{font-size:14px}
+  .idle{color:var(--muted);font-size:12.5px;text-align:center;margin:auto 0;padding:0 8px}
+  .sheet{background:#0f1830;border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:auto;animation:rise .25s ease}
+  @keyframes rise{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
+  .sheet .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .sheet .title{font-weight:700;font-size:15px;margin:4px 0 2px}
+  .sheet .origin{font-size:11px;color:var(--brand);font-family:ui-monospace,Menlo,monospace}
+  .sheet .kv{display:flex;justify-content:space-between;font-size:12px;margin:6px 0;color:var(--muted)}
+  .sheet .kv b{color:var(--text);font-weight:600;font-family:ui-monospace,Menlo,monospace}
+  .sheet .note{font-size:10.5px;color:var(--warn);margin:8px 0 12px;line-height:1.4}
+  .sheet .actions{display:flex;gap:8px}
+  .sheet .actions button{flex:1;padding:9px}
+  .qr{width:150px;height:150px;margin:8px auto;border-radius:12px;background:#fff;padding:10px}
+  .qr svg{width:100%;height:100%}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 9px}
+  /* log */
+  .log{margin-top:20px}
+  .log .card{padding:14px 16px}
+  .events{font-family:ui-monospace,Menlo,monospace;font-size:12px;max-height:150px;overflow:auto;margin:0}
+  .events div{padding:3px 0;border-bottom:1px dashed #1a2440;color:var(--muted)}
+  .events div:last-child{border:0}
+  .ev-ok{color:#9fe6b6}.ev-sign{color:#a9c4ff}.ev-info{color:var(--muted)}
+  /* code */
+  .code-card{margin-top:20px}
+  .tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+  .tabs button{padding:7px 12px;font-size:13px}
+  .tabs button.active{background:var(--navy);border-color:#2b3d68;color:#fff}
+  pre{margin:0;background:#0a1122;border:1px solid var(--line);border-radius:12px;padding:14px 16px;overflow:auto}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:1.7}
+  .tok-k{color:#c792ea}.tok-s{color:#c3e88d}.tok-f{color:#82aaff}.tok-c{color:#5c6a86}.tok-p{color:#f78c6c}
+  .foot{margin-top:26px;color:var(--muted);font-size:12px;line-height:1.7}
+  .foot b{color:var(--text)}
+  .disclaimer{margin-top:14px;padding:12px 14px;border:1px dashed #2a3a5f;border-radius:12px;color:var(--muted);font-size:12px;background:rgba(59,130,246,.05)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="logo" id="logoTop"></div>
+    <div>
+      <h1><span class="mono">@axim/connect</span> — AlphaSec 연동 샘플 <span class="badge">UI 데모 · 시뮬레이션</span></h1>
+    </div>
+  </header>
+  <p class="sub">Axim 지갑을 <b>마스터 서명자</b>로 사용하는 AlphaSec(Kaia 오더북 DEX) 연동의 4개 터치포인트 — 연결 · 세션 인가 · 입금 · 출금 — 를 시연합니다. 실제 지갑 없이 흐름을 보여주는 프론트엔드 데모이며, 아래 코드는 실제 SDK API 그대로입니다.</p>
+
+  <div class="grid">
+    <!-- dApp side -->
+    <section class="card">
+      <div class="venue-head">
+        <div class="venue-name"><span class="dot" id="connDot"></span> AlphaSec <span class="pill">dApp · Kaia L1 8217</span></div>
+        <div class="acct" id="acct">연결 안 됨</div>
+      </div>
+
+      <div class="bal">
+        <span class="amt" id="balAmt">—</span><span class="tk">USDT</span>
+        <span class="locked" id="balLocked"></span>
+      </div>
+
+      <div class="row">
+        <button class="primary" id="btnConnect">Connect with Axim</button>
+        <button id="btnSession" disabled>세션 인가 (EIP-712)</button>
+      </div>
+
+      <div class="field">
+        <input type="text" id="depAmt" value="100" inputmode="decimal" />
+        <button id="btnDeposit" disabled>입금 (L1→L2)</button>
+        <button id="btnWithdraw" disabled>출금 (L2→L1)</button>
+      </div>
+      <div class="hint" id="sessionHint">연결 후 세션을 인가하면 거래가 활성화됩니다. 주문 서명은 세션 키가 담당하며 마스터 지갑은 관여하지 않습니다.</div>
+    </section>
+
+    <!-- wallet side -->
+    <section class="card">
+      <h2>Axim Wallet</h2>
+      <div class="phone-wrap">
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="screen">
+            <div class="wallet-brand"><span class="logo" id="logoPhone"></span><b>Axim</b></div>
+            <div id="walletBody" style="display:flex;flex-direction:column;flex:1">
+              <div class="idle" id="walletIdle">지갑이 백그라운드에 있습니다.<br/>dApp 요청이 오면 푸시로 깨어나 승인 시트를 표시합니다.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="log">
+    <div class="card">
+      <h2>Event log</h2>
+      <div class="events" id="events"><div class="ev-info">준비됨 — “Connect with Axim”를 눌러 시작하세요.</div></div>
+    </div>
+  </div>
+
+  <section class="card code-card">
+    <h2>Integration code (실제 API)</h2>
+    <div class="tabs">
+      <button data-tab="rk" class="active">RainbowKit</button>
+      <button data-tab="vanilla">Vanilla EIP-1193</button>
+      <button data-tab="adapter">AlphaSec adapter</button>
+    </div>
+    <pre id="codeBox"></pre>
+  </section>
+
+  <div class="disclaimer">
+    이 페이지는 <b>프론트엔드 시뮬레이션</b>입니다. 실제 연동에서는 <span class="mono">@axim/connect</span>가 WalletConnect v2로
+    Axim 앱과 페어링하고, 승인 시트는 실제 앱에서 표시됩니다. 트랜잭션 해시·주소·잔고는 데모용 가짜 값입니다.
+  </div>
+
+  <div class="foot">
+    <b>흐름 요약</b> — 연결(서명 없음) → 세션 인가(EIP-712 1회 = 소유증명 + 세션키 위임) → 입금(Kaia L1 <span class="mono">approve</span>+<span class="mono">outboundTransfer</span>, 가스는 Axim fee-delegation 스폰서 가능) → 출금(gas-free L2 서명 → AlphaSec가 L1 자동 정산).<br/>
+    문서: <span class="mono">docs/integration-alphasec.md</span> · 패키지: <span class="mono">@axim/connect</span>, <span class="mono">@axim/connect-alphasec</span> · <a href="https://docs.axim.one">docs.axim.one</a>
+  </div>
+</div>
+
+<script>
+// ---- Axim diamond logo ----
+const LOGO = '<svg viewBox="0 0 24 24" fill="none"><path d="M12 2l7 7-7 13-7-13 7-7z" fill="#3b82f6"/><path d="M12 2l7 7-7 4-7-4 7-7z" fill="#7aa7ff"/></svg>';
+document.getElementById('logoTop').innerHTML = LOGO;
+document.getElementById('logoPhone').innerHTML = LOGO;
+
+// ---- fake QR (decorative) ----
+function fakeQR(seed){
+  let s=seed>>>0, cells='';
+  const rand=()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};
+  const N=21;
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+    const finder=(x<7&&y<7)||(x>=N-7&&y<7)||(x<7&&y>=N-7);
+    const on = finder ? ((x===0||x===6||y===0||y===6||(x>1&&x<5&&y>1&&y<5)) ? 1 : 0) : (rand()>.55?1:0);
+    if(on) cells+=`<rect x="${x}" y="${y}" width="1" height="1"/>`;
+  }
+  return `<svg viewBox="0 0 ${N} ${N}" shape-rendering="crispEdges" fill="#0a1020">${cells}</svg>`;
+}
+
+// ---- state ----
+const S={connected:false,session:false,unlocked:1000,locked:0,addr:'0x7A9c…4F21',sessionAddr:'0x3D1b…9Ac0'};
+const el=id=>document.getElementById(id);
+function short(){return '0x'+Math.floor(Math.random()*0xffffff).toString(16).padStart(6,'0')+'…'+Math.floor(Math.random()*0xffff).toString(16).padStart(4,'0');}
+function hash(){return '0x'+Array.from({length:8},()=>Math.floor(Math.random()*0xffff).toString(16).padStart(4,'0')).join('');}
+
+function log(msg,cls='ev-info'){
+  const box=el('events');
+  const t=new Date().toLocaleTimeString('en-GB');
+  const d=document.createElement('div');
+  d.className=cls; d.innerHTML=`<span class="tok-c">${t}</span>  ${msg}`;
+  box.appendChild(d); box.scrollTop=box.scrollHeight;
+}
+function render(){
+  el('connDot').className='dot'+(S.connected?' on':'');
+  el('acct').textContent=S.connected?S.addr+' · Kaia':'연결 안 됨';
+  el('balAmt').textContent=S.connected?S.unlocked.toFixed(2):'—';
+  el('balLocked').textContent=S.connected?`잠김 ${S.locked.toFixed(2)} · 세션 ${S.session?'활성':'미인가'}`:'';
+  el('btnSession').disabled=!S.connected||S.session;
+  el('btnDeposit').disabled=!S.session;
+  el('btnWithdraw').disabled=!S.session;
+  el('btnConnect').textContent=S.connected?'연결됨 ✓':'Connect with Axim';
+  el('btnConnect').disabled=S.connected;
+}
+
+// ---- wallet sheet rendering ----
+const body=()=>el('walletBody');
+function idle(){ body().innerHTML='<div class="idle" id="walletIdle">지갑이 백그라운드에 있습니다.<br/>dApp 요청이 오면 푸시로 깨어나 승인 시트를 표시합니다.</div>'; }
+function pairing(onScan){
+  body().innerHTML=`
+    <div style="text-align:center;margin-top:8px">
+      <div class="pill">WalletConnect v2 · 페어링</div>
+      <div class="qr">${fakeQR(Date.now())}</div>
+      <div style="font-size:11.5px;color:var(--muted);padding:0 6px">데스크톱은 이 QR을 Axim 앱으로 스캔합니다. 모바일은 딥링크<br/><span class="mono" style="font-size:10px">https://www.axim.one/wc?uri=…</span> 로 바로 열립니다.</div>
+      <button class="primary" id="scanBtn" style="margin-top:12px;width:100%">📷 Axim 앱에서 스캔 (시뮬레이트)</button>
+    </div>`;
+  el('scanBtn').onclick=onScan;
+}
+function sheet({kind,title,rows,note,onApprove}){
+  const rowsHtml=rows.map(r=>`<div class="kv">${r[0]}<b>${r[1]}</b></div>`).join('');
+  body().innerHTML=`
+    <div class="sheet">
+      <div class="k">${kind}</div>
+      <div class="title">${title}</div>
+      <div class="origin">app.alphasec.trade</div>
+      <div style="height:8px"></div>
+      ${rowsHtml}
+      ${note?`<div class="note">⚠ ${note}</div>`:'<div style="height:8px"></div>'}
+      <div class="actions">
+        <button id="rejectBtn">거절</button>
+        <button class="primary" id="approveBtn">승인</button>
+      </div>
+    </div>`;
+  el('approveBtn').onclick=onApprove;
+  el('rejectBtn').onclick=()=>{log('사용자가 요청을 거절함 (USER_REJECTED)','ev-info');idle();};
+}
+
+// ---- flows ----
+el('btnConnect').onclick=()=>{
+  log('dApp: <span class="tok-f">connector.connect()</span> — WalletConnect 세션 요청','ev-sign');
+  log('지갑 wake (푸시) → 페어링 표시','ev-info');
+  pairing(()=>{
+    S.connected=true;
+    log('세션 승인됨 · account='+S.addr+' · <span class="tok-k">appId</span>=alphasec','ev-ok');
+    log('연결에는 서명이 필요 없습니다 (소유증명은 세션 인가 시 1회).','ev-info');
+    idle(); render();
+  });
+};
+
+el('btnSession').onclick=()=>{
+  log('dApp: <span class="tok-f">venue.authorizeSession({ expiryDays: 30 })</span>','ev-sign');
+  sheet({
+    kind:'세션 인가 · EIP-712',
+    title:'RegisterSessionWallet',
+    rows:[['세션 지갑',S.sessionAddr],['만료','30일'],['도메인 chainId','8217 (L1)']],
+    note:'서명 1회 = 소유증명 + 세션키 위임. 이후 주문은 세션키가 서명하며 마스터는 관여하지 않습니다.',
+    onApprove:()=>{
+      S.session=true;
+      log('eth_signTypedData_v4 서명 → L2 tx('+`<span class="mono">0x01</span>`+' MatchEngine) → POST /wallet/session','ev-sign');
+      log('세션 활성 · sessionAddress='+S.sessionAddr,'ev-ok');
+      idle(); render();
+      el('sessionHint').textContent='세션 활성 — 이제 입금/출금을 시연할 수 있습니다. 주문은 AlphaSec UI에서 세션키로 처리됩니다.';
+    }
+  });
+};
+
+el('btnDeposit').onclick=()=>{
+  const amt=Math.max(0,parseFloat(el('depAmt').value)||0);
+  log(`dApp: <span class="tok-f">venue.deposit("USDT", "${amt}")</span>`,'ev-sign');
+  sheet({
+    kind:'입금 서명 · Kaia L1',
+    title:`${amt} USDT 입금`,
+    rows:[['1) approve','ERC20 Gateway'],['2) outboundTransfer','L1 → L2'],['가스','KAIA · fee-delegation']],
+    note:'USDT L1 주소는 런타임 /market/tokens 로 조회. 가스는 Axim fee-payer가 대납할 수 있습니다.',
+    onApprove:()=>{
+      const h=hash();
+      S.unlocked+=amt;
+      log('approve → outboundTransfer 서명·제출 · tx='+`<span class="mono">${h}</span>`,'ev-sign');
+      log(`입금 반영 · +${amt} USDT (L2)`,'ev-ok');
+      idle(); render();
+    }
+  });
+};
+
+el('btnWithdraw').onclick=()=>{
+  const amt=Math.max(0,parseFloat(el('depAmt').value)||0);
+  if(amt>S.unlocked){log('출금액이 사용 가능 잔고를 초과합니다.','ev-info');return;}
+  log(`dApp: <span class="tok-f">venue.withdraw("USDT", "${amt}")</span>`,'ev-sign');
+  sheet({
+    kind:'출금 서명 · L2 (gas-free)',
+    title:`${amt} USDT 출금`,
+    rows:[['to','L2 Gateway Router'],['gasPrice','0 (무가스)'],['정산','AlphaSec 자동 L1']],
+    note:'출금은 gas-free L2 서명 후 API 제출 — 가스 대납이 필요 없습니다.',
+    onApprove:()=>{
+      const h=hash();
+      S.unlocked-=amt;
+      log('gas-free L2 서명 → POST /wallet/withdraw · tx='+`<span class="mono">${h}</span>`,'ev-sign');
+      log(`출금 접수 · -${amt} USDT · L1 정산은 AlphaSec가 자동 처리`,'ev-ok');
+      idle(); render();
+    }
+  });
+};
+
+// ---- code tabs ----
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function hl(s){
+  return esc(s)
+    .replace(/(\/\/[^\n]*)/g,'<span class="tok-c">$1</span>')
+    .replace(/(&quot;[^&]*?&quot;|&#39;[^&]*?&#39;|"[^"]*"|'[^']*')/g,'<span class="tok-s">$1</span>')
+    .replace(/\b(import|from|const|await|new|export|function)\b/g,'<span class="tok-k">$1</span>')
+    .replace(/\b(aximWallet|createAximConnector|connectorsForWallets|getWalletConnectConnector|AlphaSecAdapter|authorizeSession|deposit|withdraw|getVenueBalance|connect|getProvider)\b/g,'<span class="tok-f">$1</span>');
+}
+const CODE={
+  rk:`import { aximWallet } from "@axim/connect";
+import { connectorsForWallets, getWalletConnectConnector } from "@rainbow-me/rainbowkit";
+
+// Axim = RainbowKit custom wallet (Path B — 레지스트리 등록 불필요)
+const connectors = connectorsForWallets(
+  [{ groupName: "Recommended", wallets: [
+      () => aximWallet({ projectId: WC_PROJECT_ID, appId: "alphasec", getWalletConnectConnector }),
+  ] }],
+  { appName: "AlphaSec", projectId: WC_PROJECT_ID },
+);
+// 모바일: WC uri를 Axim 딥링크로 래핑 · 데스크톱: raw uri QR`,
+  vanilla:`import { createAximConnector, kaia } from "@axim/connect";
+
+const connector = createAximConnector({
+  projectId: WC_PROJECT_ID,
+  appId: "alphasec",
+  chains: [kaia],            // ChainConfig[] — 기본 [kaia]
+});
+
+const { address, chainId } = await connector.connect();  // WC v2 세션
+const provider = connector.getProvider();                // 표준 EIP-1193
+const [addr] = await provider.request({ method: "eth_accounts" });`,
+  adapter:`import { AlphaSecAdapter } from "@axim/connect-alphasec";
+
+const venue = new AlphaSecAdapter({ provider, network: "mainnet" });
+
+const grant = await venue.authorizeSession({ expiryDays: 30 }); // EIP-712 1회
+await venue.deposit("USDT", "100");   // Kaia L1 → AlphaSec L2
+await venue.withdraw("USDT", "50");   // AlphaSec L2 → Kaia L1 (gas-free)
+const bal = await venue.getVenueBalance("USDT"); // { locked, unlocked }`
+};
+function showCode(tab){el('codeBox').innerHTML='<code>'+hl(CODE[tab])+'</code>';}
+document.querySelectorAll('.tabs button').forEach(b=>{
+  b.onclick=()=>{document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');showCode(b.dataset.tab);};
+});
+showCode('rk');
+render();
+</script>
+</body>
+</html>
