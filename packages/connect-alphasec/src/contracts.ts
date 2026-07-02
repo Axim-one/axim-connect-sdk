@@ -1,4 +1,5 @@
 import type { Address } from "@axim/connect";
+import { parseAbi } from "viem";
 
 export type Network = "mainnet" | "testnet";
 
@@ -58,3 +59,55 @@ export const API_BASE: Record<Network, string> = {
   mainnet: "https://api.alphasec.trade", // TODO: confirm REST host
   testnet: "https://api-testnet.alphasec.trade", // TODO: confirm REST host
 };
+
+/* -------------------------------------------------------------------------- */
+/* Minimal ABIs (viem parseAbi). Only the fns we encode/decode.               */
+/* -------------------------------------------------------------------------- */
+
+/** ERC20 approve on the L1 token contract. */
+export const ERC20_ABI = parseAbi([
+  "function approve(address spender, uint256 amount) returns (bool)",
+]);
+
+/**
+ * L1 GatewayRouter. `getGateway` resolves the per-token ERC20 gateway
+ * (= the approve spender). `outboundTransfer` bridges L1 -> L2.
+ */
+export const L1_GATEWAY_ROUTER_ABI = parseAbi([
+  "function getGateway(address token) view returns (address gateway)",
+  "function outboundTransfer(address l1Token, address to, uint256 amount, uint256 maxGas, uint256 gasPriceBid, bytes extraData) payable returns (bytes)",
+]);
+
+/**
+ * L2 GatewayRouter variant: 4 args with a trailing empty bytes. Used by
+ * withdraw (L2 -> L1). Distinct from the L1 6-arg form above.
+ */
+export const L2_GATEWAY_ROUTER_ABI = parseAbi([
+  "function outboundTransfer(address l1Token, address to, uint256 amount, bytes data) payable returns (bytes)",
+]);
+
+/** L1 Inbox: native KAIA deposit. */
+export const INBOX_ABI = parseAbi(["function depositEth() payable returns (uint256)"]);
+
+/** L2 ArbSys precompile: native KAIA withdraw to L1. */
+export const ARBSYS_ABI = parseAbi([
+  "function withdrawEth(address destination) payable returns (uint256)",
+]);
+
+/**
+ * Function selectors we assert against the ground-truth reference. viem derives
+ * the same selectors from the ABIs above; kept here for cross-checking.
+ *   Inbox.depositEth()            = 0x439370b1
+ *   ArbSys.withdrawEth(address)   = 0x25e16063
+ */
+export const SELECTOR = {
+  depositEth: "0x439370b1",
+  withdrawEth: "0x25e16063",
+} as const;
+
+/** Default large gas limit for gas-free L2 txs (0x30000). */
+export const L2_DEFAULT_GAS = 0x30000n;
+
+/** Bridge params for L1 outboundTransfer. */
+export const BRIDGE_MAX_GAS = 1_000_000n;
+export const BRIDGE_GAS_PRICE_BID = 1_000_000_000n; // 1 gwei

@@ -60,6 +60,13 @@ export interface SessionGrant {
   expiry: number;
   /** Whether the session wallet is active on-chain. */
   applied: boolean;
+  /**
+   * The session private key, ONLY present when the adapter generated the
+   * session keypair itself (i.e. the caller did not pass `sessionWallet`).
+   * The caller's app signs orders with this; the master/Axim key never does.
+   * Undefined when the caller supplied their own session wallet address.
+   */
+  sessionPrivateKey?: `0x${string}`;
 }
 
 export interface TxResult {
@@ -79,7 +86,16 @@ export interface Balance {
  * (e.g. AlphaSecAdapter in @axim/connect-alphasec).
  */
 export interface VenueAdapter {
-  authorizeSession(opts?: { expiryDays?: number; name?: string }): Promise<SessionGrant>;
+  authorizeSession(opts?: {
+    expiryDays?: number;
+    name?: string;
+    /**
+     * Pre-existing L2 session wallet address to authorize. When omitted the
+     * adapter generates a fresh keypair and returns its private key on the
+     * resulting `SessionGrant.sessionPrivateKey`.
+     */
+    sessionWallet?: Address;
+  }): Promise<SessionGrant>;
   deposit(token: TokenRef, amount: string): Promise<TxResult>;
   withdraw(token: TokenRef, amount: string, to?: Address): Promise<TxResult>;
   getVenueBalance(token: TokenRef): Promise<Balance>;
