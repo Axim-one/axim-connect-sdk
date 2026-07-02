@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>@axim/connect — AlphaSec 연동 샘플</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <style>
   :root{
     --navy:#0F1B3D; --bg:#0a1020; --panel:#111a33; --panel2:#0e1730;
@@ -177,17 +178,34 @@ const LOGO = '<svg viewBox="0 0 24 24" fill="none"><path d="M12 2l7 7-7 13-7-13 
 document.getElementById('logoTop').innerHTML = LOGO;
 document.getElementById('logoPhone').innerHTML = LOGO;
 
-// ---- fake QR (decorative) ----
-function fakeQR(seed){
-  let s=seed>>>0, cells='';
-  const rand=()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};
-  const N=21;
-  for(let y=0;y<N;y++)for(let x=0;x<N;x++){
-    const finder=(x<7&&y<7)||(x>=N-7&&y<7)||(x<7&&y>=N-7);
-    const on = finder ? ((x===0||x===6||y===0||y===6||(x>1&&x<5&&y>1&&y<5)) ? 1 : 0) : (rand()>.55?1:0);
-    if(on) cells+=`<rect x="${x}" y="${y}" width="1" height="1"/>`;
-  }
-  return `<svg viewBox="0 0 ${N} ${N}" shape-rendering="crispEdges" fill="#0a1020">${cells}</svg>`;
+// ---- QR: real (qrcode-generator) with a clean structured fallback ----
+function svgFromModules(isDark, n){
+  const q=2, size=n+q*2; let cells='';
+  for(let y=0;y<n;y++)for(let x=0;x<n;x++) if(isDark(y,x)) cells+=`<rect x="${x+q}" y="${y+q}" width="1" height="1"/>`;
+  return `<svg viewBox="0 0 ${size} ${size}" shape-rendering="crispEdges" fill="#0a1020"><rect width="${size}" height="${size}" fill="#fff"/>${cells}</svg>`;
+}
+// Real, scannable QR of the given text (used when the CDN lib is available).
+function realQR(text){
+  const qr=qrcode(0,'M'); qr.addData(text); qr.make();
+  const n=qr.getModuleCount();
+  return svgFromModules((r,c)=>qr.isDark(r,c), n);
+}
+// Structurally-correct decorative QR (3 finder patterns + timing) for offline.
+function fallbackQR(seed){
+  const n=25; const g=Array.from({length:n},()=>new Array(n).fill(null));
+  const finder=(ox,oy)=>{for(let y=0;y<7;y++)for(let x=0;x<7;x++)g[oy+y][ox+x]=((x===0||x===6||y===0||y===6)||(x>=2&&x<=4&&y>=2&&y<=4))?1:0;};
+  finder(0,0);finder(n-7,0);finder(0,n-7);
+  for(let i=8;i<n-8;i++){g[6][i]=i%2?0:1;g[i][6]=i%2?0:1;}
+  let s=(seed>>>0)||1; const rnd=()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};
+  for(let y=0;y<n;y++)for(let x=0;x<n;x++) if(g[y][x]===null) g[y][x]=rnd()>0.5?1:0;
+  return svgFromModules((r,c)=>g[r][c]===1, n);
+}
+// Representative (non-functional) WalletConnect deep link for the demo.
+const DEMO_URI = 'https://www.axim.one/wc?uri=' + encodeURIComponent(
+  'wc:8a1d3f6b2c9e47d0a5f1@2?relay-protocol=irn&symKey=3f9c1e7a2b8d4056');
+function qrSvg(){
+  try{ if(typeof qrcode!=='undefined') return realQR(DEMO_URI); }catch(e){}
+  return fallbackQR(Date.now());
 }
 
 // ---- state ----
@@ -222,7 +240,7 @@ function pairing(onScan){
   body().innerHTML=`
     <div style="text-align:center;margin-top:8px">
       <div class="pill">WalletConnect v2 · 페어링</div>
-      <div class="qr">${fakeQR(Date.now())}</div>
+      <div class="qr">${qrSvg()}</div>
       <div style="font-size:11.5px;color:var(--muted);padding:0 6px">데스크톱은 이 QR을 Axim 앱으로 스캔합니다. 모바일은 딥링크<br/><span class="mono" style="font-size:10px">https://www.axim.one/wc?uri=…</span> 로 바로 열립니다.</div>
       <button class="primary" id="scanBtn" style="margin-top:12px;width:100%">📷 Axim 앱에서 스캔 (시뮬레이트)</button>
     </div>`;
