@@ -1,9 +1,11 @@
 import type { AximConnectorOptions, AximWalletConfig } from "./types.js";
 
-const AXIM_ICON = "https://docs.axim.one/assets/axim-icon.png"; // TODO: final asset
-// Path B: no public WalletConnect Cloud Explorer registration — the deep link
-// is supplied directly here, so AlphaSec can add Axim as a RainbowKit custom wallet.
-const DEEPLINK_BASE = "https://link.axim.one/wc";
+const AXIM_ICON = "https://www.axim.one/assets/axim-icon.png"; // TODO: final asset URL
+// Path B: no public WalletConnect Cloud Explorer registration — the deep link is
+// supplied directly here so AlphaSec can add Axim as a RainbowKit custom wallet.
+// Verified from axim-app: universal link https://www.axim.one, custom scheme axim://.
+// The app must handle the /wc?uri= route (WC pairing) — see A3.
+const DEEPLINK_BASE = "https://www.axim.one/wc"; // fallback scheme: axim://wc?uri=
 
 /**
  * RainbowKit custom wallet for Axim. Use inside `connectorsForWallets`.
