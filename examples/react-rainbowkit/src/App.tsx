@@ -3,6 +3,7 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
 import { AlphaSecAdapter } from "@axim/connect-alphasec";
 import type { Eip1193Provider } from "@axim/connect";
+import { isConfigured } from "./wagmi";
 
 type LogKind = "run" | "ok" | "err";
 interface LogLine {
@@ -56,6 +57,18 @@ export function App() {
             </p>
           </div>
         </header>
+
+        {!isConfigured && (
+          <div style={S.warn}>
+            ⚠️ <b>VITE_WC_PROJECT_ID 미설정</b> — 실제 WalletConnect 페어링을 켜려면{" "}
+            <a href="https://cloud.reown.com" target="_blank" rel="noreferrer" style={{ color: "#7aa7ff" }}>
+              cloud.reown.com
+            </a>
+            에서 project id를 발급받아 <code style={S.code}>examples/react-rainbowkit/.env</code>에{" "}
+            <code style={S.code}>VITE_WC_PROJECT_ID=…</code>로 넣고 dev 서버를 재시작하세요. (이 값이 있어야
+            <code style={S.code}>createAximConnector</code>/<code style={S.code}>aximWallet</code>이 실제 relay에 붙습니다.)
+          </div>
+        )}
 
         <div style={S.row}>
           <ConnectButton />
@@ -116,6 +129,7 @@ const S: Record<string, CSSProperties> = {
   h1: { fontSize: 19, margin: 0 },
   code: { fontFamily: "ui-monospace,Menlo,monospace", color: "#7aa7ff", fontSize: "0.92em" },
   sub: { color: "#8a95b5", fontSize: 13.5, margin: "6px 0 0", lineHeight: 1.6 },
+  warn: { border: "1px solid #5b4a1f", background: "rgba(245,158,11,.08)", color: "#f0c66a", borderRadius: 12, padding: "12px 14px", fontSize: 13, lineHeight: 1.7, marginBottom: 16 },
   row: { display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap", marginBottom: 18 },
   acct: { fontFamily: "ui-monospace,Menlo,monospace", fontSize: 12, color: "#8a95b5" },
   actions: { display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 20 },

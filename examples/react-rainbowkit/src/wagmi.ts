@@ -28,10 +28,17 @@ if (!projectId) {
 const axim = (): Wallet =>
   aximWallet({ projectId, appId: "alphasec", getWalletConnectConnector }) as unknown as Wallet;
 
-const connectors = connectorsForWallets(
-  [{ groupName: "Axim", wallets: [axim] }],
-  { appName: "AlphaSec × Axim example", projectId },
-);
+// RainbowKit's getWalletConnectConnector throws if projectId is empty, so only
+// build the connector when configured. Without it the app still renders and
+// shows how to enable pairing (see App.tsx).
+export const isConfigured = Boolean(projectId);
+
+const connectors = isConfigured
+  ? connectorsForWallets(
+      [{ groupName: "Axim", wallets: [axim] }],
+      { appName: "AlphaSec × Axim example", projectId },
+    )
+  : [];
 
 // Kairos (1001) first = default chain for the AlphaSec testnet E2E.
 export const config = createConfig({
