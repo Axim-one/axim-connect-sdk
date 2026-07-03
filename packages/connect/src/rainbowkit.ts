@@ -1,6 +1,6 @@
 import type { AximConnectorOptions, AximWalletConfig } from "./types.js";
 
-const AXIM_ICON = "https://www.axim.one/assets/axim-icon.png"; // TODO: final asset URL
+const AXIM_ICON = "https://www.axim.one/favicon.png"; // Axim brand mark (list + WC QR center). Override via aximWallet({ iconUrl }).
 // Path B: no public WalletConnect Cloud Explorer registration — the deep link is
 // supplied directly here so AlphaSec can add Axim as a RainbowKit custom wallet.
 // Verified from axim-app: universal link https://www.axim.one, custom scheme axim://.
@@ -18,6 +18,8 @@ export interface AximWalletOptions extends AximConnectorOptions {
   getWalletConnectConnector: GetWalletConnectConnector;
   /** Optional store/download links surfaced by RainbowKit. */
   downloadUrls?: AximWalletConfig["downloadUrls"];
+  /** Override the wallet icon (shown in the list and at the WC QR center). Defaults to the Axim brand mark. */
+  iconUrl?: string;
 }
 
 /**
@@ -50,7 +52,7 @@ export function aximWallet(opts: AximWalletOptions): AximWalletConfig {
   return {
     id: "axim",
     name: "Axim",
-    iconUrl: AXIM_ICON,
+    iconUrl: opts.iconUrl ?? AXIM_ICON,
     iconBackground: "#0F1B3D",
     // Wrap the raw WC uri into the Axim deep link — the whole point of Path B.
     mobile: { getUri: (uri: string) => `${DEEPLINK_BASE}?uri=${encodeURIComponent(uri)}` },
