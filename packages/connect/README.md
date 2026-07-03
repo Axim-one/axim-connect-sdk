@@ -26,7 +26,7 @@ Create a branded connector over WalletConnect v2.
 import { createAximConnector, kaia } from "@axim/connect";
 
 const connector = createAximConnector({
-  projectId: WC_PROJECT_ID,  // WalletConnect Cloud project id
+  projectId: WC_PROJECT_ID,  // the consuming dApp's Reown (WalletConnect Cloud) project id
   appId: "alphasec",          // attribution, carried in the WC session (sessionProperties)
   chains: [kaia],             // ChainConfig[] — optional, defaults to [kaia]
   // relayUrl: "wss://…"      // optional relay override
@@ -37,7 +37,7 @@ const connector = createAximConnector({
 
 | Field | Type | Notes |
 |---|---|---|
-| `projectId` | `string` | WalletConnect Cloud project id (required) |
+| `projectId` | `string` | The consuming dApp's [Reown](https://cloud.reown.com) (formerly WalletConnect Cloud) project id (required). The Axim wallet app uses its own separate WalletKit project id. |
 | `appId` | `string` | Attribution id carried in WC `sessionProperties` |
 | `chains?` | `ChainConfig[]` | Scopes the session. Defaults to `[kaia]` |
 | `relayUrl?` | `string` | Override the WC relay URL |

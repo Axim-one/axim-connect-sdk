@@ -20,7 +20,7 @@ npm run build
 # then the example (it links the packages via file: deps):
 cd examples/react-rainbowkit
 npm install
-echo "VITE_WC_PROJECT_ID=<your walletconnect cloud project id>" > .env
+echo "VITE_WC_PROJECT_ID=<your Reown (WalletConnect Cloud) project id>" > .env
 npm run dev
 ```
 
@@ -51,7 +51,7 @@ npm run build:bundle  # vite production bundle
 
 ## Notes
 
-- `VITE_WC_PROJECT_ID` is a [WalletConnect Cloud](https://cloud.walletconnect.com) project id (required for pairing).
+- `VITE_WC_PROJECT_ID` is a **dApp-side** [Reown](https://cloud.reown.com) (formerly WalletConnect Cloud) project id — this example plays the dApp (AlphaSec) role, so it uses the dApp's project id. Note: the **Axim wallet app** initializes its own WalletKit with a **separate, Axim-owned** project id — a different value from this one.
 - `aximWallet(...)` returns `@axim/connect`'s `AximWalletConfig`, cast to RainbowKit's
   `Wallet` in `wagmi.ts` (the SDK models `createConnector` as `unknown` to avoid a hard
   RainbowKit/wagmi dependency; at runtime it is exactly what RainbowKit expects).
