@@ -74,6 +74,16 @@ export const SESSION_ENDPOINTS = {
  */
 export const BRIDGE_FEE_DEFAULT_WEI = 10_000_000_000_000_000n;
 
+/**
+ * Confirmed Kaia L1 USDT contract address per network. Mainnet confirmed by Axim.
+ * (⚠️ `/market/tokens` returns Ethereum's USDT `0xdAC17…` as a placeholder — do NOT
+ * use that for the Kaia L1 deposit token.) Testnet address TBD → runtime lookup.
+ */
+export const USDT_L1: Record<Network, Address | null> = {
+  mainnet: "0xd077A400968890Eacc75cdc901F0356c943e4fDb" as Address,
+  testnet: null,
+};
+
 /* -------------------------------------------------------------------------- */
 /* Minimal ABIs (viem parseAbi). Only the fns we encode/decode.               */
 /* -------------------------------------------------------------------------- */

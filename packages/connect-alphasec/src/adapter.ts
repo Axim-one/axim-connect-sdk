@@ -29,6 +29,7 @@ import {
   L2_DEFAULT_GAS,
   L2_GATEWAY_ROUTER_ABI,
   NETWORKS,
+  USDT_L1,
   sessionDomain,
   type Network,
 } from "./contracts.js";
@@ -133,6 +134,11 @@ export class AlphaSecAdapter implements VenueAdapter {
    */
   private async resolveL1Token(tokenId: number): Promise<Address> {
     if (this.usdtL1Override) return getAddress(this.usdtL1Override);
+
+    // Confirmed per-network USDT L1 address (mainnet). Skips the placeholder in
+    // /market/tokens (which returns Ethereum's USDT). resolveL1Token is USDT-only.
+    const known = USDT_L1[this.network];
+    if (known) return getAddress(known);
 
     const res = await fetch(`${this.apiBase}/api/v1/market/tokens`);
     if (!res.ok) {
