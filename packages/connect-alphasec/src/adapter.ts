@@ -18,9 +18,11 @@ import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import {
   API_BASE,
   ARBSYS_ABI,
+  BRIDGE_FEE_DEFAULT_WEI,
   BRIDGE_GAS_PRICE_BID,
   BRIDGE_MAX_GAS,
   DEX_COMMAND,
+  SESSION_ENDPOINTS,
   ERC20_ABI,
   INBOX_ABI,
   L1_GATEWAY_ROUTER_ABI,
@@ -53,8 +55,8 @@ export interface AlphaSecAdapterOptions {
   usdtL1Address?: Address;
   /**
    * Bridge fee (KAIA wei) sent as `value` on the L1 outboundTransfer and encoded
-   * into `extraData`. Defaults to 0n. True gasless bridging requires a sponsor
-   * policy on AlphaSec's side; we never silently fabricate a nonzero fee.
+   * into `extraData`. Defaults to 0.01 KAIA (confirmed L2 execution + submission
+   * cost per AlphaSec docs). Set to `0n` only if a sponsor covers it separately.
    */
   bridgeFeeWei?: bigint;
 }
@@ -108,7 +110,7 @@ export class AlphaSecAdapter implements VenueAdapter {
     this.net = NETWORKS[this.network];
     this.apiBase = opts.apiBase ?? API_BASE[this.network];
     this.usdtL1Override = opts.usdtL1Address;
-    this.bridgeFeeWei = opts.bridgeFeeWei ?? 0n;
+    this.bridgeFeeWei = opts.bridgeFeeWei ?? BRIDGE_FEE_DEFAULT_WEI;
   }
 
   private async address(): Promise<Address> {
@@ -274,7 +276,7 @@ export class AlphaSecAdapter implements VenueAdapter {
     });
 
     // 5. Submit.
-    const submitted = await this.submitTx("/api/v1/wallet/session", {
+    const submitted = await this.submitTx(SESSION_ENDPOINTS.create, {
       tx: signedTx,
       ...(opts?.name ? { name: opts.name } : {}),
     });

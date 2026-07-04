@@ -54,11 +54,25 @@ export const sessionDomain = (network: Network) => ({
 /** DEX command bytes (prefix of L2 tx calldata to MatchEngine). */
 export const DEX_COMMAND = { session: 0x01 } as const;
 
-/** Default REST API base. Override via adapter options. */
+/** REST API base. Confirmed: docs.alphasec.trade/for-developers/api. Override via adapter options. */
 export const API_BASE: Record<Network, string> = {
-  mainnet: "https://api.alphasec.trade", // TODO: confirm REST host
-  testnet: "https://api-testnet.alphasec.trade", // TODO: confirm REST host
+  mainnet: "https://api.alphasec.trade",
+  testnet: "https://api-testnet.alphasec.trade",
 };
+
+/** Session-wallet REST endpoints (create vs update vs delete — distinct subpaths). */
+export const SESSION_ENDPOINTS = {
+  create: "/api/v1/wallet/session",
+  update: "/api/v1/wallet/session/update",
+  delete: "/api/v1/wallet/session/delete",
+} as const;
+
+/**
+ * Default ERC20 deposit bridge fee (L2 execution + submission cost), sent as the
+ * L1 outboundTransfer `value` AND inside extraData. Confirmed 0.01 KAIA (1e16 wei)
+ * per docs.alphasec.trade/for-developers/bridge. Override via `bridgeFeeWei`.
+ */
+export const BRIDGE_FEE_DEFAULT_WEI = 10_000_000_000_000_000n;
 
 /* -------------------------------------------------------------------------- */
 /* Minimal ABIs (viem parseAbi). Only the fns we encode/decode.               */
