@@ -5,10 +5,17 @@ A **real** integration example: this app imports and calls `@axim/connect` and
 
 - `src/wagmi.ts` — registers Axim as a RainbowKit custom wallet via `aximWallet(...)`
   (injecting RainbowKit's `getWalletConnectConnector`), scoped to Kaia / Kairos.
-- `src/App.tsx` — after connecting, builds a real `AlphaSecAdapter` from the
-  connected wallet's EIP‑1193 provider and calls `authorizeSession` / `deposit` /
-  `withdraw` / `getVenueBalance`. Every call is the actual SDK; results and errors
-  are shown in the log.
+- `src/App.tsx` — a mini trading dApp UI. After connecting, builds a real
+  `AlphaSecAdapter` from the connected wallet's EIP‑1193 provider and drives the
+  full surface: `authorizeSession` / `revokeSession` / `deposit` / `withdraw` /
+  `getVenueBalance`, with a session-status card, balance card, and deposit/withdraw
+  forms. Every call is the actual SDK; results and errors are shown in the log.
+- `src/mockFetch.ts` — **Mock mode** (on by default). Replaces only AlphaSec's REST
+  responses (session create/delete, withdraw submit, balance, market tokens) with
+  local stubs, so the whole flow completes without a live AlphaSec backend. The
+  wallet still signs for real — every approval screen is exercised end‑to‑end.
+  Deposit's on-chain broadcast is *not* mocked (it goes to the Axim relayer, our
+  infra, not AlphaSec).
 
 ## Run
 
@@ -30,11 +37,29 @@ WalletConnect v2 pairing (QR on desktop, deep link on mobile).
 ## What actually works vs. what needs a live setup
 
 - **Connect / pairing:** fully real — produces a real WC URI + QR from `@axim/connect`.
-- **Session / deposit / withdraw / balance:** the SDK calls are real, but they only
-  *complete* against a live **Axim wallet** approving the requests and the AlphaSec
-  **Kairos testnet** (`network: "testnet"`, `app-testnet.alphasec.trade`, UI Faucet).
-  Without those, the buttons will surface a pending/rejected/error result in the log —
-  which is the honest behavior.
+  Needs a real `VITE_WC_PROJECT_ID` (Mock mode does **not** remove this — it only
+  replaces AlphaSec REST, not the WC transport).
+- **Mock mode ON (default):** session authorize/revoke, withdraw, and balance
+  **complete end‑to‑end** against a real Axim wallet — you see and approve every
+  signing screen, and the AlphaSec REST leg is served locally. This is the intended
+  way to validate the wallet + SDK + approval UX **before** AlphaSec is wired.
+- **Mock mode OFF (live):** the same SDK calls submit to AlphaSec's Kairos testnet
+  REST (`network: "testnet"`, `app-testnet.alphasec.trade`, UI Faucet); completing
+  them needs AlphaSec's backend live.
+- **Deposit (type49):** signs + broadcasts through the Axim relayer's
+  `/fee-delegation` (our infra) — needs a funded Kaia fee‑payer on stage. Not
+  AlphaSec-owned, so Mock mode doesn't touch it.
+
+## Deploy (for mobile QR / deep‑link + wake testing)
+
+```bash
+npm run build:bundle   # → dist/ (static site)
+# host dist/ on any static host; set VITE_WC_PROJECT_ID at build time.
+```
+
+A hosted URL lets you scan the QR / follow the deep link from a phone so the Axim
+app pairs and (with Reown Push configured) wakes on requests. Pairing requires the
+real dApp-side `VITE_WC_PROJECT_ID`.
 
 ## Build / typecheck
 

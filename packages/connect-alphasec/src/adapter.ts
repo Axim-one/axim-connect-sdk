@@ -4,6 +4,7 @@ import {
   type Address,
   type Balance,
   type Eip1193Provider,
+  type RevokeResult,
   type SessionGrant,
   type TokenRef,
   type TxResult,
@@ -29,6 +30,7 @@ import {
   L2_DEFAULT_GAS,
   L2_GATEWAY_ROUTER_ABI,
   NETWORKS,
+  SESSION_SUBTYPE,
   USDT_L1,
   sessionDomain,
   type Network,
@@ -60,6 +62,13 @@ export interface AlphaSecAdapterOptions {
    * cost per AlphaSec docs). Set to `0n` only if a sponsor covers it separately.
    */
   bridgeFeeWei?: bigint;
+  /**
+   * Override the `fetch` used for AlphaSec REST calls (session submit, withdraw
+   * submit, balance, market tokens). Defaults to the global `fetch`. Injecting a
+   * mock here lets callers exercise the full sign/submit flow — the wallet still
+   * signs for real — without a live AlphaSec backend (see the demo's mock mode).
+   */
+  fetchImpl?: typeof fetch;
 }
 
 interface WalletBalanceResponse {
@@ -104,6 +113,7 @@ export class AlphaSecAdapter implements VenueAdapter {
   private readonly apiBase: string;
   private readonly usdtL1Override?: Address;
   private readonly bridgeFeeWei: bigint;
+  private readonly fetchImpl: typeof fetch;
 
   constructor(opts: AlphaSecAdapterOptions) {
     this.provider = opts.provider;
@@ -112,6 +122,7 @@ export class AlphaSecAdapter implements VenueAdapter {
     this.apiBase = opts.apiBase ?? API_BASE[this.network];
     this.usdtL1Override = opts.usdtL1Address;
     this.bridgeFeeWei = opts.bridgeFeeWei ?? BRIDGE_FEE_DEFAULT_WEI;
+    this.fetchImpl = opts.fetchImpl ?? ((...a: Parameters<typeof fetch>) => fetch(...a));
   }
 
   private async address(): Promise<Address> {
@@ -140,7 +151,7 @@ export class AlphaSecAdapter implements VenueAdapter {
     const known = USDT_L1[this.network];
     if (known) return getAddress(known);
 
-    const res = await fetch(`${this.apiBase}/api/v1/market/tokens`);
+    const res = await this.fetchImpl(`${this.apiBase}/api/v1/market/tokens`);
     if (!res.ok) {
       throw new AximError("REQUEST_FAILED", `GET /market/tokens failed: ${res.status}`);
     }
@@ -165,7 +176,7 @@ export class AlphaSecAdapter implements VenueAdapter {
     path: string,
     body: Record<string, unknown>,
   ): Promise<{ txHash: string; applied?: boolean }> {
-    const res = await fetch(`${this.apiBase}${path}`, {
+    const res = await this.fetchImpl(`${this.apiBase}${path}`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(body),
@@ -254,7 +265,7 @@ export class AlphaSecAdapter implements VenueAdapter {
     // 4. L2 tx: to = MatchEngine, calldata = 0x01 || hex(utf8(SessionContext)).
     //    tx chainId = L2, gasPrice 0, value 0x0, gasLimit 0x30000, SAME nonce.
     const sessionContext = {
-      type: DEX_COMMAND.session,
+      type: SESSION_SUBTYPE.create,
       publickey: sessionWallet,
       expiresAt: expiry,
       nonce: Number(nonce),
@@ -294,6 +305,83 @@ export class AlphaSecAdapter implements VenueAdapter {
       applied: submitted.applied ?? false,
       ...(sessionPrivateKey ? { sessionPrivateKey } : {}),
     };
+  }
+
+  /**
+   * Revoke (delete) an authorized L2 session wallet — type-3 SessionContext.
+   * Mirrors `authorizeSession`: the master EIP-712-signs a delete authorization
+   * (domain chainId = L1) plus a gas-free L2 tx (to = MatchEngine, command 0x01,
+   * `SessionContext.type = 3`), submitted to POST /api/v1/wallet/session/delete.
+   * After this the session key can no longer sign orders at the venue.
+   *
+   * ASSUMPTION (confirm with AlphaSec): the delete authorization reuses the
+   * `RegisterSessionWallet` EIP-712 type with `expiry = 0` to denote revocation.
+   * The exact delete schema is UNVERIFIED — adjust once AlphaSec confirms.
+   */
+  async revokeSession(opts: { sessionWallet: Address; nonce?: bigint }): Promise<RevokeResult> {
+    const master = await this.address();
+    const sessionWallet = getAddress(opts.sessionWallet);
+    const nonce = opts.nonce ?? this.timeNonce();
+    const expiry = 0; // revoke: no validity window.
+
+    // 1. EIP-712 delete authorization, signed by the MASTER. Domain chainId = L1.
+    const domain = sessionDomain(this.network);
+    const typedData = {
+      types: {
+        EIP712Domain: [
+          { name: "name", type: "string" },
+          { name: "version", type: "string" },
+          { name: "chainId", type: "uint256" },
+          { name: "verifyingContract", type: "address" },
+        ],
+        RegisterSessionWallet: [
+          { name: "sessionWallet", type: "address" },
+          { name: "expiry", type: "uint64" },
+          { name: "nonce", type: "uint64" },
+        ],
+      },
+      primaryType: "RegisterSessionWallet",
+      domain,
+      message: {
+        sessionWallet,
+        expiry: String(expiry),
+        nonce: String(nonce),
+      },
+    };
+    const l1signature = await this.provider.request<`0x${string}`>({
+      method: "eth_signTypedData_v4",
+      params: [master, JSON.stringify(typedData)],
+    });
+
+    // 2. Gas-free L2 tx: to = MatchEngine, calldata = 0x01 || hex(utf8(SessionContext type=3)).
+    const sessionContext = {
+      type: SESSION_SUBTYPE.delete,
+      publickey: sessionWallet,
+      nonce: Number(nonce),
+      l1owner: master,
+      l1signature,
+    };
+    const command = numberToHex(DEX_COMMAND.session, { size: 1 }); // 0x01
+    const data = concatHex(command, utf8ToHex(JSON.stringify(sessionContext)));
+    const signedTx = await this.provider.request<`0x${string}`>({
+      method: "eth_signTransaction",
+      params: [
+        {
+          from: master,
+          to: this.net.l2.matchEngine,
+          data,
+          value: "0x0",
+          gas: toHex(L2_DEFAULT_GAS),
+          gasPrice: "0x0",
+          chainId: toHex(this.net.l2ChainId),
+          nonce: toHex(nonce),
+        },
+      ],
+    });
+
+    // 3. Submit to the delete endpoint.
+    const submitted = await this.submitTx(SESSION_ENDPOINTS.delete, { tx: signedTx });
+    return { applied: submitted.applied ?? false, txHash: submitted.txHash };
   }
 
   /**
@@ -430,7 +518,7 @@ export class AlphaSecAdapter implements VenueAdapter {
   async getVenueBalance(token: TokenRef): Promise<Balance> {
     const { id } = resolveToken(token);
     const address = await this.address();
-    const res = await fetch(`${this.apiBase}/api/v1/wallet/balance?address=${address}`);
+    const res = await this.fetchImpl(`${this.apiBase}/api/v1/wallet/balance?address=${address}`);
     if (!res.ok) {
       throw new AximError("REQUEST_FAILED", `GET /wallet/balance failed: ${res.status}`);
     }

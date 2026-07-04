@@ -73,6 +73,13 @@ export interface TxResult {
   txHash: string;
 }
 
+export interface RevokeResult {
+  /** Whether the session delete was applied at the venue / on-chain. */
+  applied: boolean;
+  /** Venue-returned tx hash for the delete, when provided. */
+  txHash?: string;
+}
+
 export interface Balance {
   token: TokenRef;
   /** Locked in open orders (not withdrawable). */
@@ -96,6 +103,13 @@ export interface VenueAdapter {
      */
     sessionWallet?: Address;
   }): Promise<SessionGrant>;
+  /**
+   * Revoke (delete) a previously authorized L2 session wallet. The master signs
+   * a type-3 delete authorization; afterwards the session key can no longer sign
+   * orders at the venue. `sessionWallet` is the address returned by
+   * `authorizeSession` (`SessionGrant.sessionAddress`).
+   */
+  revokeSession(opts: { sessionWallet: Address; nonce?: bigint }): Promise<RevokeResult>;
   deposit(token: TokenRef, amount: string): Promise<TxResult>;
   withdraw(token: TokenRef, amount: string, to?: Address): Promise<TxResult>;
   getVenueBalance(token: TokenRef): Promise<Balance>;

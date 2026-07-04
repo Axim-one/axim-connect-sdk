@@ -54,6 +54,12 @@ export const sessionDomain = (network: Network) => ({
 /** DEX command bytes (prefix of L2 tx calldata to MatchEngine). */
 export const DEX_COMMAND = { session: 0x01 } as const;
 
+/**
+ * SessionContext `type` subfield (inside the 0x01 session command JSON):
+ * 1 = create (authorize), 2 = update, 3 = delete (revoke).
+ */
+export const SESSION_SUBTYPE = { create: 1, update: 2, delete: 3 } as const;
+
 /** REST API base. Confirmed: docs.alphasec.trade/for-developers/api. Override via adapter options. */
 export const API_BASE: Record<Network, string> = {
   mainnet: "https://api.alphasec.trade",
