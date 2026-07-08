@@ -1,0 +1,32 @@
+name: publish
+
+# npm 배포 워크플로우. 수동 실행(workflow_dispatch) 또는 GitHub Release 발행 시 동작.
+# 사전: repo Secret `NPM_TOKEN` = npm Granular token (Packages: Read+Write, bypass 2FA).
+# 버전은 각 package.json 에서 관리 — 이미 게시된 버전은 npm 이 거부하므로 새 릴리스 전 bump 필요.
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+      - run: npm ci
+      - run: npm run build --workspaces --if-present
+      # 의존 순서: connect 먼저, 그다음 connect-alphasec.
+      - run: npm publish -w @axim-one/connect --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: npm publish -w @axim-one/connect-alphasec --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
