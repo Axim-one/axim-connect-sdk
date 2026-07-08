@@ -19,7 +19,7 @@
     "build": "tsc -p tsconfig.json"
   },
   "keywords": ["axim", "alphasec", "kaia", "walletconnect", "dex"],
-  "private": true,
+  "publishConfig": { "access": "public" },
   "dependencies": {
     "@axim/connect": "^0.1.0-alpha.0",
     "viem": "^2"
