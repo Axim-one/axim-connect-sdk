@@ -25,8 +25,17 @@ if (!projectId) {
  * is only needed because the SDK models `createConnector` as `unknown` (to avoid
  * importing wagmi types); at runtime it is exactly what RainbowKit expects.
  */
-const axim = (): Wallet =>
-  aximWallet({ projectId, appId: "alphasec", getWalletConnectConnector }) as unknown as Wallet;
+const axim = (): Wallet => {
+  const w = aximWallet({ projectId, appId: "alphasec", getWalletConnectConnector }) as unknown as Wallet & {
+    qrCode?: { getUri: (uri: string) => string; instructions?: unknown };
+  };
+  // QR encodes the Axim custom-scheme deep link. The app team is updating the
+  // in-app scanner to accept `axim://wc?uri=` (unwrap to the raw wc: uri).
+  if (w.qrCode) {
+    w.qrCode = { ...w.qrCode, getUri: (uri: string) => `axim://wc?uri=${encodeURIComponent(uri)}` };
+  }
+  return w as Wallet;
+};
 
 // RainbowKit's getWalletConnectConnector throws if projectId is empty, so only
 // build the connector when configured. Without it the app still renders and
@@ -40,9 +49,9 @@ const connectors = isConfigured
     )
   : [];
 
-// Kairos (1001) first = default chain for the AlphaSec testnet E2E.
+// Kaia (8217) first = default chain for the AlphaSec MAINNET E2E.
 export const config = createConfig({
-  chains: [kairos, kaia],
+  chains: [kaia, kairos],
   connectors,
   transports: {
     [kairos.id]: http(),

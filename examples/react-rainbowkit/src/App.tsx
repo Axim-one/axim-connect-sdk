@@ -36,7 +36,7 @@ export function App() {
     const provider = (await connector.getProvider()) as Eip1193Provider;
     return new AlphaSecAdapter({
       provider,
-      network: "testnet",
+      network: "mainnet",
       ...(mock ? { fetchImpl: makeMockFetch((m) => push("info", `mock ← ${m}`)) } : {}),
     });
   }, [connector, mock, push]);
