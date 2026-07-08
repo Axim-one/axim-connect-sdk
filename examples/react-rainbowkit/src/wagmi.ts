@@ -5,7 +5,7 @@ import {
   getWalletConnectConnector,
   type Wallet,
 } from "@rainbow-me/rainbowkit";
-import { aximWallet } from "@axim/connect";
+import { aximWallet } from "@axim-one/connect";
 
 // WalletConnect Cloud project id — required for real pairing.
 // Set VITE_WC_PROJECT_ID in an .env file (see README).
@@ -19,9 +19,9 @@ if (!projectId) {
 }
 
 /**
- * `aximWallet` returns @axim/connect's `AximWalletConfig`, which is structurally
+ * `aximWallet` returns @axim-one/connect's `AximWalletConfig`, which is structurally
  * a RainbowKit `Wallet`. We inject RainbowKit's `getWalletConnectConnector` so
- * `@axim/connect` keeps zero hard dependency on RainbowKit/wagmi. The cast below
+ * `@axim-one/connect` keeps zero hard dependency on RainbowKit/wagmi. The cast below
  * is only needed because the SDK models `createConnector` as `unknown` (to avoid
  * importing wagmi types); at runtime it is exactly what RainbowKit expects.
  */

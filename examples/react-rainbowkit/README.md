@@ -1,7 +1,7 @@
 # Runnable example — AlphaSec × Axim (React + RainbowKit + wagmi)
 
-A **real** integration example: this app imports and calls `@axim/connect` and
-`@axim/connect-alphasec` directly — it does not simulate them.
+A **real** integration example: this app imports and calls `@axim-one/connect` and
+`@axim-one/connect-alphasec` directly — it does not simulate them.
 
 - `src/wagmi.ts` — registers Axim as a RainbowKit custom wallet via `aximWallet(...)`
   (injecting RainbowKit's `getWalletConnectConnector`), scoped to Kaia / Kairos.
@@ -36,7 +36,7 @@ WalletConnect v2 pairing (QR on desktop, deep link on mobile).
 
 ## What actually works vs. what needs a live setup
 
-- **Connect / pairing:** fully real — produces a real WC URI + QR from `@axim/connect`.
+- **Connect / pairing:** fully real — produces a real WC URI + QR from `@axim-one/connect`.
   Needs a real `VITE_WC_PROJECT_ID` (Mock mode does **not** remove this — it only
   replaces AlphaSec REST, not the WC transport).
 - **Mock mode ON (default):** session authorize/revoke, withdraw, and balance
@@ -68,16 +68,16 @@ npm run build       # tsc --noEmit — typechecks the app against the real SDK
 npm run build:bundle  # vite production bundle
 ```
 
-> In *this monorepo*, `@axim/connect` is linked via `file:` deps, so a production
+> In *this monorepo*, `@axim-one/connect` is linked via `file:` deps, so a production
 > `vite build` can hit a transitive WalletConnect crypto resolution edge
 > (`@scure/bip32` → `@noble/curves`) caused by cross-`node_modules` hoisting. It
-> does **not** affect `npm run dev` or a consumer who installs `@axim/connect`
+> does **not** affect `npm run dev` or a consumer who installs `@axim-one/connect`
 > from a registry (their dependency tree is consistent). Use `npm run dev` to run.
 
 ## Notes
 
 - `VITE_WC_PROJECT_ID` is a **dApp-side** [Reown](https://cloud.reown.com) (formerly WalletConnect Cloud) project id — this example plays the dApp (AlphaSec) role, so it uses the dApp's project id. Note: the **Axim wallet app** initializes its own WalletKit with a **separate, Axim-owned** project id — a different value from this one.
-- `aximWallet(...)` returns `@axim/connect`'s `AximWalletConfig`, cast to RainbowKit's
+- `aximWallet(...)` returns `@axim-one/connect`'s `AximWalletConfig`, cast to RainbowKit's
   `Wallet` in `wagmi.ts` (the SDK models `createConnector` as `unknown` to avoid a hard
   RainbowKit/wagmi dependency; at runtime it is exactly what RainbowKit expects).
 - To target mainnet, change `network: "testnet"` → `"mainnet"` in `App.tsx`.

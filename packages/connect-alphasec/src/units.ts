@@ -1,4 +1,4 @@
-import type { TokenRef } from "@axim/connect";
+import type { TokenRef } from "@axim-one/connect";
 import { TOKENS } from "./contracts.js";
 
 export interface ResolvedToken {

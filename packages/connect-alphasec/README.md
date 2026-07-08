@@ -1,8 +1,8 @@
-# @axim/connect-alphasec
+# @axim-one/connect-alphasec
 
-AlphaSec venue adapter for [`@axim/connect`](../connect). Isolates all AlphaSec‑specific signing and submission behind the venue‑agnostic `VenueAdapter` interface.
+AlphaSec venue adapter for [`@axim-one/connect`](../connect). Isolates all AlphaSec‑specific signing and submission behind the venue‑agnostic `VenueAdapter` interface.
 
-> **Not published to npm.** This package lives in the monorepo and is consumed by the venue directly. It depends on `@axim/connect` and `viem`.
+> **Not published to npm.** This package lives in the monorepo and is consumed by the venue directly. It depends on `@axim-one/connect` and `viem`.
 
 ## Position
 
@@ -11,8 +11,8 @@ Axim is the **master signer** and USDT rail. It signs exactly four touchpoints �
 ## Usage
 
 ```ts
-import { createAximConnector } from "@axim/connect";
-import { AlphaSecAdapter } from "@axim/connect-alphasec";
+import { createAximConnector } from "@axim-one/connect";
+import { AlphaSecAdapter } from "@axim-one/connect-alphasec";
 
 const connector = createAximConnector({ projectId, appId: "alphasec" });
 await connector.connect();
@@ -72,7 +72,7 @@ Reads the L2 balance via `GET /api/v1/wallet/balance`. Returns `{ token, locked,
 `resolveToken`, `parseAmount`, `formatAmount` (units), plus `NETWORKS`, `TOKENS`, `sessionDomain`, `DEX_COMMAND`, `API_BASE`, and the minimal contract ABIs are exported for advanced use.
 
 ```ts
-import { parseAmount, formatAmount } from "@axim/connect-alphasec";
+import { parseAmount, formatAmount } from "@axim-one/connect-alphasec";
 parseAmount("USDT", "1.5"); // 1500000n
 formatAmount("USDT", 1500000n); // "1.5"
 ```

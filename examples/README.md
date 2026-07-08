@@ -4,8 +4,8 @@ Two examples, for two purposes.
 
 ## `react-rainbowkit/` — runnable app that **uses the SDK** (recommended)
 
-A real React + wagmi + RainbowKit app that **imports and calls** `@axim/connect`
-and `@axim/connect-alphasec` — not a simulation.
+A real React + wagmi + RainbowKit app that **imports and calls** `@axim-one/connect`
+and `@axim-one/connect-alphasec` — not a simulation.
 
 - `src/wagmi.ts` registers Axim via `aximWallet(...)`; `src/App.tsx` drives a real
   `AlphaSecAdapter` (`authorizeSession` / `deposit` / `withdraw` / `getVenueBalance`)

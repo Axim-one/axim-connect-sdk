@@ -1,8 +1,8 @@
 import { useCallback, useState, type CSSProperties } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
-import { AlphaSecAdapter } from "@axim/connect-alphasec";
-import type { Balance, Eip1193Provider, SessionGrant } from "@axim/connect";
+import { AlphaSecAdapter } from "@axim-one/connect-alphasec";
+import type { Balance, Eip1193Provider, SessionGrant } from "@axim-one/connect";
 import { isConfigured } from "./wagmi";
 import { makeMockFetch } from "./mockFetch";
 
@@ -91,7 +91,7 @@ export function App() {
           <div style={S.logo}>◆</div>
           <div style={{ flex: 1 }}>
             <h1 style={S.h1}>
-              AlphaSec × Axim — <code style={S.code}>@axim/connect</code> 데모 dApp
+              AlphaSec × Axim — <code style={S.code}>@axim-one/connect</code> 데모 dApp
             </h1>
             <p style={S.sub}>
               실제 SDK를 호출하는 미니 거래 dApp입니다. “Connect with Axim”은 진짜 WalletConnect v2

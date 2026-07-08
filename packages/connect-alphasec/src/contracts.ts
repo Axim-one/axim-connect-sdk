@@ -1,4 +1,4 @@
-import type { Address } from "@axim/connect";
+import type { Address } from "@axim-one/connect";
 import { parseAbi } from "viem";
 
 export type Network = "mainnet" | "testnet";

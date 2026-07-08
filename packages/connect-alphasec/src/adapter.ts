@@ -9,7 +9,7 @@ import {
   type TokenRef,
   type TxResult,
   type VenueAdapter,
-} from "@axim/connect";
+} from "@axim-one/connect";
 import {
   encodeFunctionData,
   getAddress,
@@ -45,7 +45,7 @@ import {
 import { parseAmount, resolveToken } from "./units.js";
 
 export interface AlphaSecAdapterOptions {
-  /** EIP-1193 provider from @axim/connect (master signer over WalletConnect). */
+  /** EIP-1193 provider from @axim-one/connect (master signer over WalletConnect). */
   provider: Eip1193Provider;
   network?: Network;
   /** Override the REST API base. */

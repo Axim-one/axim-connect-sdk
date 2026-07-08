@@ -1,4 +1,4 @@
-import { AximError, type Address, type Eip1193Provider } from "@axim/connect";
+import { AximError, type Address, type Eip1193Provider } from "@axim-one/connect";
 import {
   decodeFunctionResult,
   encodeAbiParameters,

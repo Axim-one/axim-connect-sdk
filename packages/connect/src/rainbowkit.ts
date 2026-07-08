@@ -13,7 +13,7 @@ export type GetWalletConnectConnector = (params: { projectId: string }) => unkno
 export interface AximWalletOptions extends AximConnectorOptions {
   /**
    * Pass RainbowKit's `getWalletConnectConnector` here (from `@rainbow-me/rainbowkit`).
-   * Injected so `@axim/connect` takes no hard dependency on RainbowKit/wagmi.
+   * Injected so `@axim-one/connect` takes no hard dependency on RainbowKit/wagmi.
    */
   getWalletConnectConnector: GetWalletConnectConnector;
   /** Optional store/download links surfaced by RainbowKit. */

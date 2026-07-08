@@ -1,36 +1,36 @@
-# @axim/connect
+# @axim-one/connect
 
 > Connect dApps to **Axim Wallet** over WalletConnect v2. A thin, branded EIP‑1193 connector — works unchanged with ethers, viem, and wagmi.
 
 [![status](https://img.shields.io/badge/status-alpha-blue)](https://docs.axim.one) [![license](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 
-Axim is a USDT‑first wallet on Kaia. `@axim/connect` is **not a new protocol** — it is a thin wrapper over standard WalletConnect v2 that returns a standard EIP‑1193 provider, plus a small adapter layer that isolates venue‑specific flows (e.g. AlphaSec deposit/withdraw/session). If your app already supports WalletConnect, adding Axim is close to zero work.
+Axim is a USDT‑first wallet on Kaia. `@axim-one/connect` is **not a new protocol** — it is a thin wrapper over standard WalletConnect v2 that returns a standard EIP‑1193 provider, plus a small adapter layer that isolates venue‑specific flows (e.g. AlphaSec deposit/withdraw/session). If your app already supports WalletConnect, adding Axim is close to zero work.
 
 ## Packages
 
 | Package | Description |
 |---|---|
-| [`@axim/connect`](./packages/connect) | **Published.** Vendor‑agnostic core: branded connector, EIP‑1193 provider, RainbowKit custom wallet, `appId` attribution. |
-| [`@axim/connect-alphasec`](./packages/connect-alphasec) | **In‑repo, not published.** AlphaSec venue adapter (`authorizeSession`, `deposit`, `withdraw`, `getVenueBalance`). Consumed from this monorepo by the venue. |
+| [`@axim-one/connect`](./packages/connect) | **Published.** Vendor‑agnostic core: branded connector, EIP‑1193 provider, RainbowKit custom wallet, `appId` attribution. |
+| [`@axim-one/connect-alphasec`](./packages/connect-alphasec) | **In‑repo, not published.** AlphaSec venue adapter (`authorizeSession`, `deposit`, `withdraw`, `getVenueBalance`). Consumed from this monorepo by the venue. |
 
 ## Install
 
 ```bash
-npm install @axim/connect
+npm install @axim-one/connect
 ```
 
-> Only `@axim/connect` is published to npm. Venue adapters (e.g. the AlphaSec adapter) live in this monorepo and are consumed by the venue directly — the public package stays venue‑agnostic.
+> Only `@axim-one/connect` is published to npm. Venue adapters (e.g. the AlphaSec adapter) live in this monorepo and are consumed by the venue directly — the public package stays venue‑agnostic.
 
-Peer dependencies (provide the ones your app uses): `viem`, `wagmi`, `@rainbow-me/rainbowkit`, `@walletconnect/universal-provider`. `@axim/connect` takes **no hard dependency** on RainbowKit or wagmi — the RainbowKit connector factory is injected (see below).
+Peer dependencies (provide the ones your app uses): `viem`, `wagmi`, `@rainbow-me/rainbowkit`, `@walletconnect/universal-provider`. `@axim-one/connect` takes **no hard dependency** on RainbowKit or wagmi — the RainbowKit connector factory is injected (see below).
 
 ## Two ways to integrate
 
 ### 1. RainbowKit custom wallet (recommended for wagmi/RainbowKit apps)
 
-Axim is added as a **custom wallet** — no WalletConnect Cloud Explorer registry entry is required. You inject RainbowKit's `getWalletConnectConnector` so `@axim/connect` never has to depend on RainbowKit/wagmi directly.
+Axim is added as a **custom wallet** — no WalletConnect Cloud Explorer registry entry is required. You inject RainbowKit's `getWalletConnectConnector` so `@axim-one/connect` never has to depend on RainbowKit/wagmi directly.
 
 ```ts
-import { aximWallet } from "@axim/connect";
+import { aximWallet } from "@axim-one/connect";
 import { connectorsForWallets, getWalletConnectConnector } from "@rainbow-me/rainbowkit";
 
 const connectors = connectorsForWallets(
@@ -51,7 +51,7 @@ On mobile, RainbowKit hands the raw WalletConnect pairing URI to Axim's `mobile.
 ### 2. Vanilla EIP‑1193 (non‑RainbowKit apps)
 
 ```ts
-import { createAximConnector, kaia } from "@axim/connect";
+import { createAximConnector, kaia } from "@axim-one/connect";
 
 const connector = createAximConnector({
   projectId: WC_PROJECT_ID,
@@ -67,7 +67,7 @@ const [address] = await provider.request({ method: "eth_accounts" });
 ### Venue adapter (AlphaSec)
 
 ```ts
-import { AlphaSecAdapter } from "@axim/connect-alphasec";
+import { AlphaSecAdapter } from "@axim-one/connect-alphasec";
 
 const venue = new AlphaSecAdapter({ provider, network: "mainnet" });
 const grant = await venue.authorizeSession({ expiryDays: 30 }); // EIP‑712 session‑key authorization (once)

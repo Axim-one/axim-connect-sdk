@@ -90,7 +90,7 @@ export interface Balance {
 
 /**
  * Venue-specific flows, isolated from the core. Implemented per venue
- * (e.g. AlphaSecAdapter in @axim/connect-alphasec).
+ * (e.g. AlphaSecAdapter in @axim-one/connect-alphasec).
  */
 export interface VenueAdapter {
   authorizeSession(opts?: {

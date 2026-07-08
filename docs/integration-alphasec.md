@@ -1,6 +1,6 @@
 # AlphaSec × Axim — integration guide
 
-How AlphaSec connects to **Axim Wallet** and drives the four master‑signed touchpoints (connect → session → deposit → withdraw) using `@axim/connect` and `@axim/connect-alphasec`.
+How AlphaSec connects to **Axim Wallet** and drives the four master‑signed touchpoints (connect → session → deposit → withdraw) using `@axim-one/connect` and `@axim-one/connect-alphasec`.
 
 ## Roles
 
@@ -19,14 +19,14 @@ Transport is **WalletConnect v2**. Axim is added as a **RainbowKit custom wallet
 | L1 (Kaia) chainId | `8217` | `1001` |
 | L2 (NitroX) chainId | `48217` | `41001` |
 
-L2 is **gas‑free** (`gasPrice: 0`). Addresses (Inbox, L1/L2 GatewayRouter, MatchEngine `0x…cc`, ArbSys `0x…64`) are baked into `@axim/connect-alphasec` (`NETWORKS`). Token ids: `1 = KAIA`, `2 = USDT`.
+L2 is **gas‑free** (`gasPrice: 0`). Addresses (Inbox, L1/L2 GatewayRouter, MatchEngine `0x…cc`, ArbSys `0x…64`) are baked into `@axim-one/connect-alphasec` (`NETWORKS`). Token ids: `1 = KAIA`, `2 = USDT`.
 
 ## 1. Add Axim as a custom wallet
 
 AlphaSec owns the RainbowKit/wagmi setup and injects `getWalletConnectConnector`:
 
 ```ts
-import { aximWallet } from "@axim/connect";
+import { aximWallet } from "@axim-one/connect";
 import { connectorsForWallets, getWalletConnectConnector } from "@rainbow-me/rainbowkit";
 
 const connectors = connectorsForWallets(
@@ -49,8 +49,8 @@ Connecting establishes a WC session only — **no signature is requested**. Proo
 ## 3. Authorize the trading session (one EIP‑712 signature)
 
 ```ts
-import { createAximConnector } from "@axim/connect";
-import { AlphaSecAdapter } from "@axim/connect-alphasec";
+import { createAximConnector } from "@axim-one/connect";
+import { AlphaSecAdapter } from "@axim-one/connect-alphasec";
 
 const connector = createAximConnector({ projectId: WC_PROJECT_ID, appId: "alphasec" });
 await connector.connect();

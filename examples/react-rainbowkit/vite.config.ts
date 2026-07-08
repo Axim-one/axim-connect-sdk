@@ -23,6 +23,6 @@ export default defineConfig({
     ],
   },
   optimizeDeps: {
-    include: ["@axim/connect", "@axim/connect-alphasec"],
+    include: ["@axim-one/connect", "@axim-one/connect-alphasec"],
   },
 });

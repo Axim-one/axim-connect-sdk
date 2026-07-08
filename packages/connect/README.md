@@ -1,12 +1,12 @@
-# @axim/connect
+# @axim-one/connect
 
 Branded WalletConnect v2 connector + EIP‑1193 provider for **Axim Wallet**. Venue‑agnostic core.
 
 ```bash
-npm install @axim/connect
+npm install @axim-one/connect
 ```
 
-`@axim/connect` wraps standard WalletConnect v2 (`@walletconnect/universal-provider`) and returns a standard EIP‑1193 provider. It adds a branded connection lifecycle, a RainbowKit custom‑wallet helper, `appId` attribution, and a typed error model. It takes **no hard dependency** on RainbowKit or wagmi.
+`@axim-one/connect` wraps standard WalletConnect v2 (`@walletconnect/universal-provider`) and returns a standard EIP‑1193 provider. It adds a branded connection lifecycle, a RainbowKit custom‑wallet helper, `appId` attribution, and a typed error model. It takes **no hard dependency** on RainbowKit or wagmi.
 
 ## Peer dependencies
 
@@ -23,7 +23,7 @@ npm install @axim/connect
 Create a branded connector over WalletConnect v2.
 
 ```ts
-import { createAximConnector, kaia } from "@axim/connect";
+import { createAximConnector, kaia } from "@axim-one/connect";
 
 const connector = createAximConnector({
   projectId: WC_PROJECT_ID,  // the consuming dApp's Reown (WalletConnect Cloud) project id
@@ -66,7 +66,7 @@ const provider = connector.getProvider();
 RainbowKit custom wallet (Path B — no public registry entry). You **inject** RainbowKit's `getWalletConnectConnector` so this package never imports RainbowKit/wagmi.
 
 ```ts
-import { aximWallet } from "@axim/connect";
+import { aximWallet } from "@axim-one/connect";
 import { connectorsForWallets, getWalletConnectConnector } from "@rainbow-me/rainbowkit";
 
 const connectors = connectorsForWallets(
@@ -91,7 +91,7 @@ The returned wallet sets `mobile.getUri` to wrap the WC URI into the Axim deep l
 ### Chains
 
 ```ts
-import { kaia, kaiaKairos, KAIA_MAINNET_ID, KAIA_TESTNET_ID } from "@axim/connect";
+import { kaia, kaiaKairos, KAIA_MAINNET_ID, KAIA_TESTNET_ID } from "@axim-one/connect";
 ```
 
 `kaia` (id `8217`) and `kaiaKairos` (id `1001`, testnet) are provided as `ChainConfig` (a minimal viem‑compatible chain shape). Pass your own `ChainConfig[]` to scope the session differently.
@@ -101,7 +101,7 @@ import { kaia, kaiaKairos, KAIA_MAINNET_ID, KAIA_TESTNET_ID } from "@axim/connec
 All SDK errors are `AximError` with a stable `code`:
 
 ```ts
-import { AximError } from "@axim/connect";
+import { AximError } from "@axim-one/connect";
 
 try {
   await connector.connect();
