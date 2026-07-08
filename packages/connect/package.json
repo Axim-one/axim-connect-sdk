@@ -20,6 +20,9 @@
   },
   "keywords": ["axim", "walletconnect", "wallet", "eip-1193", "kaia", "web3"],
   "publishConfig": { "access": "public" },
+  "repository": { "type": "git", "url": "git+https://github.com/Axim-one/axim-connect-sdk.git", "directory": "packages/connect" },
+  "homepage": "https://github.com/Axim-one/axim-connect-sdk#readme",
+  "bugs": { "url": "https://github.com/Axim-one/axim-connect-sdk/issues" },
   "peerDependencies": {
     "@rainbow-me/rainbowkit": ">=2",
     "@walletconnect/universal-provider": ">=2",
