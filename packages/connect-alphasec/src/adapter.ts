@@ -25,6 +25,7 @@ import {
   DEX_COMMAND,
   SESSION_ENDPOINTS,
   ERC20_ABI,
+  ERC20_UNLIMITED_APPROVAL,
   INBOX_ABI,
   L1_GATEWAY_ROUTER_ABI,
   L2_DEFAULT_GAS,
@@ -418,11 +419,14 @@ export class AlphaSecAdapter implements VenueAdapter {
     const router = this.net.l1.gatewayRouter;
 
     // Step 1: approve the per-token ERC20 gateway (spender = getGateway(l1Token)).
+    // Approve UNLIMITED (maxUint256), not the deposit amount — standard dApp
+    // pattern so a repeat deposit skips a fresh approve. The real deposit amount
+    // (`value`) stays on outboundTransfer args[2] below; only approve is max.
     const spender = await getGateway(this.provider, router, l1Token);
     const approveData = encodeFunctionData({
       abi: ERC20_ABI,
       functionName: "approve",
-      args: [spender, value],
+      args: [spender, ERC20_UNLIMITED_APPROVAL],
     });
     const approveHash = await this.provider.request<`0x${string}`>({
       method: "eth_sendTransaction",

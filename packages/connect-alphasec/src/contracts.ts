@@ -1,5 +1,5 @@
 import type { Address } from "@axim-one/connect";
-import { parseAbi } from "viem";
+import { maxUint256, parseAbi } from "viem";
 
 export type Network = "mainnet" | "testnet";
 
@@ -98,6 +98,14 @@ export const USDT_L1: Record<Network, Address | null> = {
 export const ERC20_ABI = parseAbi([
   "function approve(address spender, uint256 amount) returns (bool)",
 ]);
+
+/**
+ * Unlimited ERC20 approval amount (2^256 - 1). AlphaSec deposit approves the
+ * gateway for the max allowance (standard dApp pattern) so a repeat deposit
+ * skips a fresh approve. Only the approve `amount` is unlimited — the actual
+ * bridged amount stays the real deposit value on outboundTransfer.
+ */
+export const ERC20_UNLIMITED_APPROVAL = maxUint256;
 
 /**
  * L1 GatewayRouter. `getGateway` resolves the per-token ERC20 gateway
