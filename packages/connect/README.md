@@ -114,7 +114,7 @@ Codes: `USER_REJECTED` · `TIMEOUT` · `DISCONNECTED` · `NOT_CONNECTED` · `CHA
 
 ## Status
 
-Alpha. Implemented and typecheck‑clean; **runtime‑untested** against a live relay/E2E flow. See the repo [README](../../README.md) and [docs.axim.one](https://docs.axim.one).
+Early release, published on npm. Implemented and typecheck‑clean; **not yet runtime‑validated** against a live relay/E2E flow — treat as preview. See the repo [README](../../README.md) and [docs.axim.one](https://docs.axim.one).
 
 ## License
 

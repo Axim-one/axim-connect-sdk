@@ -2,7 +2,11 @@
 
 AlphaSec venue adapter for [`@axim-one/connect`](../connect). Isolates all AlphaSec‑specific signing and submission behind the venue‑agnostic `VenueAdapter` interface.
 
-> **Not published to npm.** This package lives in the monorepo and is consumed by the venue directly. It depends on `@axim-one/connect` and `viem`.
+```bash
+npm install @axim-one/connect-alphasec
+```
+
+Pulls in `@axim-one/connect` and `viem` automatically.
 
 ## Position
 
@@ -85,7 +89,7 @@ formatAmount("USDT", 1500000n); // "1.5"
 
 ## Status
 
-Alpha, **runtime‑untested** (needs a clean install for viem's `@noble/curves` transitive dep and a live Kaia L1/L2 + AlphaSec REST E2E). See the [AlphaSec integration guide](../../docs/integration-alphasec.md).
+Early release, published on npm. **Not yet runtime‑validated** against live Kaia L1/L2 + AlphaSec REST (E2E) — treat as preview. See the [AlphaSec integration guide](../../docs/integration-alphasec.md).
 
 ## License
 

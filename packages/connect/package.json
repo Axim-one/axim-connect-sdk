@@ -1,6 +1,6 @@
 {
   "name": "@axim-one/connect",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Branded WalletConnect v2 connector + EIP-1193 provider for Axim Wallet.",
   "license": "MIT",
   "type": "module",

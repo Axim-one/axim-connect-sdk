@@ -1,6 +1,6 @@
 {
   "name": "@axim-one/connect-alphasec",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "AlphaSec venue adapter for @axim-one/connect (session, deposit, withdraw, balance).",
   "license": "MIT",
   "type": "module",
@@ -24,7 +24,7 @@
   "homepage": "https://github.com/Axim-one/axim-connect-sdk#readme",
   "bugs": { "url": "https://github.com/Axim-one/axim-connect-sdk/issues" },
   "dependencies": {
-    "@axim-one/connect": "^0.1.0",
+    "@axim-one/connect": "^0.1.1",
     "viem": "^2"
   }
 }
