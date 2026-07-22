@@ -11,7 +11,7 @@ Axim is a USDT‑first wallet on Kaia. `@axim-one/connect` is **not a new protoc
 | Package | Description |
 |---|---|
 | [`@axim-one/connect`](./packages/connect) | **Published.** Vendor‑agnostic core: branded connector, EIP‑1193 provider, RainbowKit custom wallet, `appId` attribution. |
-| [`@axim-one/connect-alphasec`](./packages/connect-alphasec) | **In‑repo, not published.** AlphaSec venue adapter (`authorizeSession`, `deposit`, `withdraw`, `getVenueBalance`). Consumed from this monorepo by the venue. |
+| [`@axim-one/connect-alphasec`](./packages/connect-alphasec) | **Published.** AlphaSec venue adapter (`authorizeSession`, `deposit`, `withdraw`, `getVenueBalance`). |
 
 ## Install
 
@@ -19,7 +19,7 @@ Axim is a USDT‑first wallet on Kaia. `@axim-one/connect` is **not a new protoc
 npm install @axim-one/connect
 ```
 
-> Only `@axim-one/connect` is published to npm. Venue adapters (e.g. the AlphaSec adapter) live in this monorepo and are consumed by the venue directly — the public package stays venue‑agnostic.
+> Both packages are published to npm. `@axim-one/connect` is the venue‑agnostic core; installing `@axim-one/connect-alphasec` pulls it in automatically.
 
 Peer dependencies (provide the ones your app uses): `viem`, `wagmi`, `@rainbow-me/rainbowkit`, `@walletconnect/universal-provider`. `@axim-one/connect` takes **no hard dependency** on RainbowKit or wagmi — the RainbowKit connector factory is injected (see below).
 
@@ -86,7 +86,7 @@ See the [AlphaSec integration guide](./docs/integration-alphasec.md) for the ful
 
 ## Status
 
-**Alpha (`0.1.0‑alpha`).** The API surface is implemented and typecheck‑clean, but has **not yet been exercised against a live WalletConnect relay or an end‑to‑end pairing/deposit/withdraw flow** — treat as runtime‑untested until the Kaia Kairos testnet E2E completes. See the spec and docs at [docs.axim.one](https://docs.axim.one).
+**Early release, published on npm.** The API surface is implemented and typecheck‑clean, but has **not yet been exercised against a live WalletConnect relay or an end‑to‑end pairing/deposit/withdraw flow** — treat as runtime‑untested until the Kaia Kairos testnet E2E completes. See the spec and docs at [docs.axim.one](https://docs.axim.one).
 
 ## Development
 
