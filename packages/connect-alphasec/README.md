@@ -51,12 +51,15 @@ const grant = await venue.authorizeSession({ expiryDays: 30 });
 
 ### `deposit(token, amount) → TxResult`
 
-Bridges Kaia **L1 → L2** via direct on‑chain L1 txs (no REST). Gas is paid in KAIA by the master (the Axim wallet may fee‑delegate — not the adapter's concern).
+Bridges Kaia **L1 → L2** via direct on‑chain L1 txs (no REST). Gas is fee‑delegated by the Axim wallet.
 
-- **USDT (ERC20):** `approve(gateway, amount)` then `L1GatewayRouter.outboundTransfer(...)`. The approve spender is resolved at runtime via `L1GatewayRouter.getGateway(l1Token)`; the USDT L1 address is resolved via `GET /api/v1/market/tokens` (RESIDUAL‑1).
+- **USDT (ERC20) — gasless paymaster path (mainnet default):** `approve(paymaster, maxUint256)` then `AximDepositPaymaster.deposit(amount, "0x")`. **Both txs carry `value = 0`** — the paymaster pulls the USDT, approves the gateway, and pays the bridge fee (`value`) from its own KAIA, so **a USDT‑only wallet with zero KAIA can deposit**. `bridgeFeeWei` is ignored on this path.
+- **USDT — direct path (testnet, or `paymaster: null`):** `approve(gateway, maxUint256)` then `L1GatewayRouter.outboundTransfer(...)` with `value = bridgeFeeWei` — **the wallet pays the bridge fee in KAIA**. The approve spender is resolved at runtime via `L1GatewayRouter.getGateway(l1Token)`. Kairos has no paymaster, so testnet always takes this path.
 - **KAIA (native):** `Inbox.depositEth()` with `value = amount`.
 
-Returns the `outboundTransfer` (or `depositEth`) tx hash.
+Returns the `deposit` (or `outboundTransfer` / `depositEth`) tx hash.
+
+> Pass `paymaster: null` to force the direct path on mainnet (interim testing where the wallet funds its own KAIA), or `paymaster: "0x…"` to override the address.
 
 ### `withdraw(token, amount, to?) → TxResult`
 
