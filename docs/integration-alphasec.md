@@ -69,7 +69,14 @@ This is a single `eth_signTypedData_v4` (`RegisterSessionWallet`, domain `chainI
 await venue.deposit("USDT", "100");
 ```
 
-USDT deposit is a two‑step L1 flow (`approve` → `L1GatewayRouter.outboundTransfer`) sent through the master via `eth_sendTransaction`. Gas is paid in KAIA and may be sponsored by Axim fee delegation on the wallet side (transparent to the venue).
+USDT deposit is a **two‑step L1 flow** sent through the master via `eth_sendTransaction`, and which two steps depends on the network:
+
+| | step 1 | step 2 | `value` | wallet needs KAIA? |
+| :-- | :-- | :-- | :-- | :-- |
+| **mainnet** (default) | `approve(paymaster, maxUint256)` | `AximDepositPaymaster.deposit(amount, "0x")` | **0 on both** | **no** — the paymaster pays the bridge fee from its own KAIA |
+| **testnet** (Kairos, no paymaster) | `approve(gateway, maxUint256)` | `L1GatewayRouter.outboundTransfer(…)` | `bridgeFeeWei` on step 2 | yes |
+
+Gas itself is fee‑delegated by the Axim wallet on both paths (transparent to the venue), so the mainnet path is **fully gasless** — a USDT‑only wallet with zero KAIA can deposit. Pass `paymaster: null` to force the direct path on mainnet.
 
 - The USDT L1 address is resolved at runtime (`/market/tokens`) — pass `usdtL1Address` to skip once confirmed.
 - The bridge fee (`value`) defaults to `0n`; set `bridgeFeeWei` if AlphaSec requires one (see RESIDUAL‑2).
