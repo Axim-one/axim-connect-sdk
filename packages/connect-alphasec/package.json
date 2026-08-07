@@ -1,6 +1,6 @@
 {
   "name": "@axim-one/connect-alphasec",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "AlphaSec venue adapter for @axim-one/connect (session, deposit, withdraw, balance).",
   "license": "MIT",
   "type": "module",
