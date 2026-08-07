@@ -90,6 +90,18 @@ export const USDT_L1: Record<Network, Address | null> = {
   testnet: null,
 };
 
+/**
+ * AlphaSec deposit gasless paymaster (AximDepositPaymaster). Deployed on Kaia
+ * mainnet — pays the bridge fee (`value`) from its own KAIA so USDT-only wallets
+ * deposit with zero KAIA. testnet has no paymaster (null) → deposit falls back to
+ * the direct approve(gateway)+outboundTransfer path.
+ * On-chain params verified: usdt/router/gateway/inbox match NETWORKS.mainnet.
+ */
+export const PAYMASTER: Record<Network, Address | null> = {
+  mainnet: "0x62a64b3efaf853c561ddb693141679e7267f0d50" as Address,
+  testnet: null,
+};
+
 /* -------------------------------------------------------------------------- */
 /* Minimal ABIs (viem parseAbi). Only the fns we encode/decode.               */
 /* -------------------------------------------------------------------------- */
@@ -114,6 +126,17 @@ export const ERC20_UNLIMITED_APPROVAL = maxUint256;
 export const L1_GATEWAY_ROUTER_ABI = parseAbi([
   "function getGateway(address token) view returns (address gateway)",
   "function outboundTransfer(address l1Token, address to, uint256 amount, uint256 maxGas, uint256 gasPriceBid, bytes extraData) payable returns (bytes)",
+]);
+
+/**
+ * AximDepositPaymaster. `deposit(amount, extraData)` — user approves the
+ * paymaster for USDT, then calls this (value = 0). The paymaster pulls USDT,
+ * approves the gateway, and calls outboundTransfer paying the bridge fee from
+ * its own KAIA. maxGas/gasPriceBid are contract-side constants (not passed here).
+ *   deposit(uint256,bytes) selector = 0x5d303519
+ */
+export const PAYMASTER_ABI = parseAbi([
+  "function deposit(uint256 amount, bytes extraData)",
 ]);
 
 /**
@@ -146,6 +169,13 @@ export const SELECTOR = {
 /** Default large gas limit for gas-free L2 txs (0x30000). */
 export const L2_DEFAULT_GAS = 0x30000n;
 
-/** Bridge params for L1 outboundTransfer. */
+/** Bridge params for L1 outboundTransfer (direct path). */
 export const BRIDGE_MAX_GAS = 1_000_000n;
 export const BRIDGE_GAS_PRICE_BID = 1_000_000_000n; // 1 gwei
+
+/**
+ * Gas limit for `paymaster.deposit`. Wraps transferFrom + approve +
+ * outboundTransfer (retryable ticket creation) + on-chain fee quote, so it needs
+ * more headroom than a direct outboundTransfer.
+ */
+export const PAYMASTER_DEPOSIT_GAS = 900_000n;

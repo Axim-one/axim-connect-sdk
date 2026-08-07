@@ -31,6 +31,9 @@ import {
   L2_DEFAULT_GAS,
   L2_GATEWAY_ROUTER_ABI,
   NETWORKS,
+  PAYMASTER,
+  PAYMASTER_ABI,
+  PAYMASTER_DEPOSIT_GAS,
   SESSION_SUBTYPE,
   USDT_L1,
   sessionDomain,
@@ -63,6 +66,17 @@ export interface AlphaSecAdapterOptions {
    * cost per AlphaSec docs). Set to `0n` only if a sponsor covers it separately.
    */
   bridgeFeeWei?: bigint;
+  /**
+   * AlphaSec deposit gasless paymaster (AximDepositPaymaster) address.
+   * - `undefined` (default): use the per-network known address (mainnet only;
+   *   testnet null → direct outboundTransfer path).
+   * - an address: override.
+   * - `null`: force the legacy direct path (approve(gateway)+outboundTransfer),
+   *   e.g. for interim testing where the user funds KAIA themselves.
+   * When set, `deposit()` routes as approve(paymaster)+paymaster.deposit (value 0);
+   * the paymaster covers the bridge fee so the wallet needs no KAIA.
+   */
+  paymaster?: Address | null;
   /**
    * Override the `fetch` used for AlphaSec REST calls (session submit, withdraw
    * submit, balance, market tokens). Defaults to the global `fetch`. Injecting a
@@ -114,6 +128,7 @@ export class AlphaSecAdapter implements VenueAdapter {
   private readonly apiBase: string;
   private readonly usdtL1Override?: Address;
   private readonly bridgeFeeWei: bigint;
+  private readonly paymaster: Address | null;
   private readonly fetchImpl: typeof fetch;
 
   constructor(opts: AlphaSecAdapterOptions) {
@@ -123,6 +138,13 @@ export class AlphaSecAdapter implements VenueAdapter {
     this.apiBase = opts.apiBase ?? API_BASE[this.network];
     this.usdtL1Override = opts.usdtL1Address;
     this.bridgeFeeWei = opts.bridgeFeeWei ?? BRIDGE_FEE_DEFAULT_WEI;
+    // undefined → per-network default; null → force direct path; address → override.
+    this.paymaster =
+      opts.paymaster !== undefined
+        ? opts.paymaster
+          ? getAddress(opts.paymaster)
+          : null
+        : PAYMASTER[this.network];
     this.fetchImpl = opts.fetchImpl ?? ((...a: Parameters<typeof fetch>) => fetch(...a));
   }
 
@@ -387,9 +409,13 @@ export class AlphaSecAdapter implements VenueAdapter {
 
   /**
    * Deposit from Kaia L1 to AlphaSec L2 via direct on-chain L1 txs (no REST).
-   * ERC20 (USDT): approve(gateway, amount) then L1GatewayRouter.outboundTransfer.
+   * ERC20 (USDT):
+   *   - paymaster set (mainnet default): approve(paymaster) + paymaster.deposit
+   *     (both value 0; paymaster covers the bridge fee → wallet needs no KAIA).
+   *   - paymaster null (testnet / interim): approve(gateway) + outboundTransfer
+   *     with value = bridgeFeeWei (wallet pays the bridge fee in KAIA).
    * Native KAIA: Inbox.depositEth() with value = amount (no approve).
-   * Gas paid in KAIA by the master; fee delegation (if any) is the wallet's job.
+   * Gas is fee-delegated by the wallet; the paymaster path makes it fully gasless.
    */
   async deposit(token: TokenRef, amount: string): Promise<TxResult> {
     const { id, symbol } = resolveToken(token);
@@ -416,6 +442,49 @@ export class AlphaSecAdapter implements VenueAdapter {
 
     // ERC20 path (USDT). RESIDUAL-1: resolve the real L1 token at runtime.
     const l1Token = await this.resolveL1Token(id);
+
+    // Gasless path: when a paymaster is configured (mainnet default), route through
+    // it. The user approves the PAYMASTER (not the gateway); paymaster.deposit pulls
+    // the USDT, approves the gateway, and pays the bridge fee (value) from its own
+    // KAIA. Both txs are value=0 → fully gasless once the relayer fee-delegates them.
+    if (this.paymaster) {
+      const pmApproveData = encodeFunctionData({
+        abi: ERC20_ABI,
+        functionName: "approve",
+        args: [this.paymaster, ERC20_UNLIMITED_APPROVAL],
+      });
+      const pmApproveHash = await this.provider.request<`0x${string}`>({
+        method: "eth_sendTransaction",
+        params: [
+          { from: master, to: l1Token, data: pmApproveData, value: "0x0", gas: toHex(50_000n) },
+        ],
+      });
+      await this.waitForReceipt(pmApproveHash);
+
+      // paymaster.deposit(amount, extraData="0x"). value=0; maxGas/gasPriceBid are
+      // contract-side constants. extraData = gateway callHook data (empty for a
+      // standard token deposit).
+      const depositData = encodeFunctionData({
+        abi: PAYMASTER_ABI,
+        functionName: "deposit",
+        args: [value, "0x"],
+      });
+      const pmTxHash = await this.provider.request<`0x${string}`>({
+        method: "eth_sendTransaction",
+        params: [
+          {
+            from: master,
+            to: this.paymaster,
+            data: depositData,
+            value: "0x0",
+            gas: toHex(PAYMASTER_DEPOSIT_GAS),
+          },
+        ],
+      });
+      return { txHash: pmTxHash };
+    }
+
+    // Direct path (legacy / testnet): approve(gateway) + outboundTransfer, value = bridge fee.
     const router = this.net.l1.gatewayRouter;
 
     // Step 1: approve the per-token ERC20 gateway (spender = getGateway(l1Token)).
