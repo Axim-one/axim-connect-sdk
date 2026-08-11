@@ -179,3 +179,9 @@ export const BRIDGE_GAS_PRICE_BID = 1_000_000_000n; // 1 gwei
  * more headroom than a direct outboundTransfer.
  */
 export const PAYMASTER_DEPOSIT_GAS = 900_000n;
+
+/**
+ * Gas limit for the ERC20 `approve` step. 50k reverted on Kaia (a fresh
+ * allowance SSTORE + overhead exceeds it), so use a safe headroom.
+ */
+export const APPROVE_GAS = 100_000n;

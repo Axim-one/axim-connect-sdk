@@ -1,6 +1,6 @@
 {
   "name": "@axim-one/connect-alphasec",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "AlphaSec venue adapter for @axim-one/connect (session, deposit, withdraw, balance).",
   "license": "MIT",
   "type": "module",
@@ -13,16 +13,33 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "sideEffects": false,
   "scripts": {
     "build": "tsc -p tsconfig.json"
   },
-  "keywords": ["axim", "alphasec", "kaia", "walletconnect", "dex"],
-  "publishConfig": { "access": "public" },
-  "repository": { "type": "git", "url": "git+https://github.com/Axim-one/axim-connect-sdk.git", "directory": "packages/connect-alphasec" },
+  "keywords": [
+    "axim",
+    "alphasec",
+    "kaia",
+    "walletconnect",
+    "dex"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Axim-one/axim-connect-sdk.git",
+    "directory": "packages/connect-alphasec"
+  },
   "homepage": "https://github.com/Axim-one/axim-connect-sdk#readme",
-  "bugs": { "url": "https://github.com/Axim-one/axim-connect-sdk/issues" },
+  "bugs": {
+    "url": "https://github.com/Axim-one/axim-connect-sdk/issues"
+  },
   "dependencies": {
     "@axim-one/connect": "^0.1.1",
     "viem": "^2"

@@ -28,6 +28,7 @@ import {
   ERC20_UNLIMITED_APPROVAL,
   INBOX_ABI,
   L1_GATEWAY_ROUTER_ABI,
+  APPROVE_GAS,
   L2_DEFAULT_GAS,
   L2_GATEWAY_ROUTER_ABI,
   NETWORKS,
@@ -456,7 +457,7 @@ export class AlphaSecAdapter implements VenueAdapter {
       const pmApproveHash = await this.provider.request<`0x${string}`>({
         method: "eth_sendTransaction",
         params: [
-          { from: master, to: l1Token, data: pmApproveData, value: "0x0", gas: toHex(50_000n) },
+          { from: master, to: l1Token, data: pmApproveData, value: "0x0", gas: toHex(APPROVE_GAS) },
         ],
       });
       await this.waitForReceipt(pmApproveHash);
@@ -500,7 +501,7 @@ export class AlphaSecAdapter implements VenueAdapter {
     const approveHash = await this.provider.request<`0x${string}`>({
       method: "eth_sendTransaction",
       params: [
-        { from: master, to: l1Token, data: approveData, value: "0x0", gas: toHex(50_000n) },
+        { from: master, to: l1Token, data: approveData, value: "0x0", gas: toHex(APPROVE_GAS) },
       ],
     });
     // Await approval mining before the bridge call.
